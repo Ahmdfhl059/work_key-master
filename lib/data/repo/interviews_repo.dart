@@ -1,40 +1,38 @@
-import 'package:dio/dio.dart';
 import '../api/interviews_api.dart';
 import '../models/interview_model.dart';
 
 class InterviewsRepo {
-  final InterviewsApi _interviewsApi = InterviewsApi();
+  final InterviewsApi _interviewsApi;
 
-  Future<List<InterviewModel>> getMyInterviews() async {
-    try {
-      Response response = await _interviewsApi.getMyInterviews();
-      if (response.data['success'] == true) {
-        return (response.data['data'] as List)
-            .map((e) => InterviewModel.fromMap(e))
-            .toList();
-      }
-      return [];
-    } catch (e) {
-      return [];
-    }
+  InterviewsRepo({InterviewsApi? interviewsApi})
+    : _interviewsApi = interviewsApi ?? InterviewsApi();
+
+  Future<InterviewListResponse> getMyInterviews({
+    int page = 1,
+    int perPage = 15,
+  }) async {
+    final response = await _interviewsApi.getMyInterviews(
+      page: page,
+      perPage: perPage,
+    );
+    return InterviewListResponse.fromMap(
+      Map<String, dynamic>.from(response.data as Map),
+    );
   }
 
   Future<InterviewModel> getInterviewDetails(int id) async {
-    try {
-      Response response = await _interviewsApi.getInterviewDetails(id);
-      if (response.data['success'] == true) {
-        InterviewModel model = InterviewModel.fromMap(response.data['data']);
-        model.message = response.data['message'];
-        return model;
-      } else {
-        InterviewModel error = InterviewModel.initial();
-        error.message = response.data['message'];
-        return error;
-      }
-    } catch (e) {
-      InterviewModel error = InterviewModel.initial();
-      error.message = e.toString();
-      return error;
-    }
+    final response = await _interviewsApi.getInterviewDetails(id);
+    final root = Map<String, dynamic>.from(response.data as Map);
+    final data = root['data'];
+    if (data is! Map) throw const FormatException('Interview data is missing.');
+    return InterviewModel.fromMap(Map<String, dynamic>.from(data));
+  }
+
+  Future<InterviewModel> confirmInterview(int id) async {
+    final response = await _interviewsApi.confirmInterview(id);
+    final root = Map<String, dynamic>.from(response.data as Map);
+    final data = root['data'];
+    if (data is! Map) throw const FormatException('Interview data is missing.');
+    return InterviewModel.fromMap(Map<String, dynamic>.from(data));
   }
 }

@@ -13,6 +13,7 @@ import 'package:work_key/screens/profile/widgets/profile_edit_sheet.dart';
 import 'package:work_key/screens/profile/widgets/profile_sections.dart';
 import 'package:work_key/screens/profile/widgets/profile_cv_section.dart';
 import 'package:work_key/screens/profile/widgets/profile_manage_sheets.dart';
+import 'package:work_key/screens/interviews/interviews_screen.dart';
 import 'package:work_key/shared/components/components.dart';
 import 'package:work_key/utils/constants.dart';
 
@@ -38,16 +39,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     listeners: [
       BlocListener<AuthCubit, AuthStates>(
         listener: (context, state) {
-          if (state is LogoutSuccessState)
+          if (state is LogoutSuccessState) {
             navigateAndFinish(context, const LoginScreen());
+          }
         },
       ),
       BlocListener<ProfileCubit, ProfileStates>(
         listener: (context, state) {
-          if (state is GetProfileSuccessState)
+          if (state is GetProfileSuccessState) {
             setState(() => profile = state.profileModel);
-          if (state is UpdateProfileSuccessState)
+          }
+          if (state is UpdateProfileSuccessState) {
             setState(() => profile = state.profileModel);
+          }
         },
       ),
     ],
@@ -56,13 +60,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: BlocBuilder<ProfileCubit, ProfileStates>(
         builder: (context, state) {
           final strings = ProfileStrings.of(context);
-          if (profile == null && state is ProfileLoadingState)
+          if (profile == null && state is ProfileLoadingState) {
             return const _ProfileLoading();
-          if (profile == null && state is ProfileErrorState)
+          }
+          if (profile == null && state is ProfileErrorState) {
             return _ProfileError(
               message: 'Unable to load your profile.',
               retry: context.read<ProfileCubit>().getProfile,
             );
+          }
           if (profile == null) return const _ProfileLoading();
           return RefreshIndicator(
             onRefresh: () async => context.read<ProfileCubit>().getProfile(),
@@ -120,6 +126,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 14),
                   const ProfileCvSection(),
+                  const SizedBox(height: 14),
+                  InkWell(
+                    onTap: () => navigateTo(context, const InterviewsScreen()),
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.all(17),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: HomeColors.divider),
+                      ),
+                      child: const Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 22,
+                            backgroundColor: HomeColors.softPurple,
+                            child: Icon(
+                              Icons.video_call_rounded,
+                              color: HomeColors.purple,
+                            ),
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                DefaultText(
+                                  text: 'My interviews',
+                                  style: TextStyle(
+                                    color: HomeColors.ink,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                                SizedBox(height: 3),
+                                DefaultText(
+                                  text: 'View schedules and attendance details',
+                                  style: TextStyle(
+                                    color: HomeColors.muted,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 15,
+                            color: HomeColors.muted,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 14),
                   OutlinedButton.icon(
                     onPressed: () => _confirmLogout(context, strings),

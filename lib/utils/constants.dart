@@ -4,7 +4,7 @@ import 'package:hexcolor/hexcolor.dart';
 
 // تم إزالة السلاش من النهاية لمنع تكراره في الطلبات //
 final ipAddress = "https://workey.onrender.com/api/v1";
-final baseURL = ipAddress; 
+final baseURL = ipAddress;
 final ip = ipAddress;
 
 final defaultColor = ('#2BB7C3');
@@ -31,47 +31,107 @@ abstract final class HomeColors {
   static const Color warning = Color(0xFFF59E36);
 }
 
-
 class FilterConstants {
   static const List<String> syrianGovernorates = [
-    'Damascus', 'Rif Dimashq', 'Aleppo', 'Hama', 'Homs',
-    'Latakia', 'Tartus', 'Idlib', 'Al-Hasakah',
-    'Deir ez-Zor', 'Ar-Raqqah', 'As-Suwayda', 'Daraa', 'Quneitra'
+    'Damascus',
+    'Rif Dimashq',
+    'Aleppo',
+    'Hama',
+    'Homs',
+    'Latakia',
+    'Tartus',
+    'Idlib',
+    'Al-Hasakah',
+    'Deir ez-Zor',
+    'Ar-Raqqah',
+    'As-Suwayda',
+    'Daraa',
+    'Quneitra',
   ];
 
   static const List<String> jobFields = [
-    'Software Engineering', 'Marketing', 'Sales', 'Graphics Design',
-    'Finance', 'Human Resources', 'Healthcare', 'Education', 'Customer Service'
+    'Software Engineering',
+    'Marketing',
+    'Sales',
+    'Graphics Design',
+    'Finance',
+    'Human Resources',
+    'Healthcare',
+    'Education',
+    'Customer Service',
   ];
 
   static const List<String> careerLevels = [
-    'Entry Level', 'Junior', 'Mid Level', 'Senior', 'Expert', 'Manager'
+    'Entry Level',
+    'Junior',
+    'Mid Level',
+    'Senior',
+    'Expert',
+    'Manager',
   ];
 
   static const List<String> workTypes = [
-    'Full Time', 'Part Time', 'Freelance', 'Remote', 'Internship', 'Contract'
+    'Full Time',
+    'Part Time',
+    'Freelance',
+    'Remote',
+    'Internship',
+    'Contract',
   ];
 }
 
-
 class TargetConstants {
   static const List<String> governorates = [
-    'Damascus', 'Rif Dimashq', 'Aleppo', 'Hama', 'Homs', 'Latakia', 'Tartus', 'Idlib', 'Al-Hasakah', 'Deir ez-Zor', 'Ar-Raqqah', 'As-Suwayda', 'Daraa', 'Quneitra'
+    'Damascus',
+    'Rif Dimashq',
+    'Aleppo',
+    'Hama',
+    'Homs',
+    'Latakia',
+    'Tartus',
+    'Idlib',
+    'Al-Hasakah',
+    'Deir ez-Zor',
+    'Ar-Raqqah',
+    'As-Suwayda',
+    'Daraa',
+    'Quneitra',
   ];
 
   static const List<String> jobFields = [
-    'Software Engineering', 'Marketing', 'Sales', 'Graphics Design', 'Finance', 'Human Resources', 'Healthcare', 'Education', 'Customer Service'
+    'Software Engineering',
+    'Marketing',
+    'Sales',
+    'Graphics Design',
+    'Finance',
+    'Human Resources',
+    'Healthcare',
+    'Education',
+    'Customer Service',
   ];
 
   static const List<String> educationLevels = [
-    'High School', 'Diploma', 'Bachelor Degree', 'Master Degree', 'PhD'
+    'High School',
+    'Diploma',
+    'Bachelor Degree',
+    'Master Degree',
+    'PhD',
   ];
 
   static const List<String> careerLevels = [
-    'Entry Level', 'Junior', 'Mid Level', 'Senior', 'Expert', 'Manager'
+    'Entry Level',
+    'Junior',
+    'Mid Level',
+    'Senior',
+    'Expert',
+    'Manager',
   ];
 
   static const List<String> workTypes = [
-    'Full Time', 'Part Time', 'Freelance', 'Remote', 'Internship'
+    'Full Time',
+    'Part Time',
+    'Freelance',
+    'Remote',
+    'Internship',
   ];
 }

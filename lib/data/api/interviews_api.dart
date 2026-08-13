@@ -1,29 +1,34 @@
 import 'package:dio/dio.dart';
+
 import '../../utils/dio_methods.dart';
 
 class InterviewsApi {
-  Future<Response> getMyInterviews() async {
-    return await RemoteApi.get('/my/interviews');
-  }
+  Future<Response> getMyInterviews({int page = 1, int perPage = 15}) =>
+      RemoteApi.get(
+        '/my/interviews',
+        queryParameters: {'page': page, 'per_page': perPage},
+      );
 
-  Future<Response> getInterviewDetails(int id) async {
-    return await RemoteApi.get('/interviews/$id');
-  }
+  Future<Response> getInterviewDetails(int id) =>
+      RemoteApi.get('/interviews/$id');
 
-  // Employer specific
-  Future<Response> scheduleInterview(int applicationId, Map<String, dynamic> data) async {
-    return await RemoteApi.post('/applications/$applicationId/interviews', body: data);
-  }
+  Future<Response> confirmInterview(int id) =>
+      RemoteApi.post('/interviews/$id/confirm');
 
-  Future<Response> updateInterview(int id, Map<String, dynamic> data) async {
-    return await RemoteApi.put('/interviews/$id', body: data);
-  }
+  // Employer endpoints are kept for the existing employer-side flows.
+  Future<Response> scheduleInterview(
+    int applicationId,
+    Map<String, dynamic> data,
+  ) => RemoteApi.post('/applications/$applicationId/interviews', body: data);
 
-  Future<Response> completeInterview(int id, String? note) async {
-    return await RemoteApi.post('/interviews/$id/complete', body: {'completion_note': note});
-  }
+  Future<Response> updateInterview(int id, Map<String, dynamic> data) =>
+      RemoteApi.put('/interviews/$id', body: data);
 
-  Future<Response> evaluateInterview(int id, Map<String, dynamic> data) async {
-    return await RemoteApi.post('/interviews/$id/evaluate', body: data);
-  }
+  Future<Response> completeInterview(int id, String? note) => RemoteApi.post(
+    '/interviews/$id/complete',
+    body: {'completion_note': note},
+  );
+
+  Future<Response> evaluateInterview(int id, Map<String, dynamic> data) =>
+      RemoteApi.post('/interviews/$id/evaluate', body: data);
 }
