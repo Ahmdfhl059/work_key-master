@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:work_key/screens/auth/login/login_screen.dart';
 import 'package:work_key/screens/auth/register/register_screen.dart';
+import 'package:work_key/shared/components/animated_app_logo.dart';
 import 'package:work_key/shared/components/components.dart';
-import 'package:work_key/shared/images/image.dart';
 import 'package:work_key/utils/constants.dart';
 
 class GuestTopBar extends StatelessWidget {
@@ -17,19 +17,14 @@ class GuestTopBar extends StatelessWidget {
           Expanded(
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Image.asset(
-                AppImages.logo,
-                width: compact ? 112 : 142,
-                height: 48,
-                fit: BoxFit.contain,
-              ),
+              child: AdaptiveAppLogo(width: compact ? 112 : 142, height: 48),
             ),
           ),
           DefaultTextButton(
             text: 'Sign in',
             onPressed: () => navigateTo(context, const LoginScreen()),
-            textStyle: const TextStyle(
-              color: HomeColors.ink,
+            textStyle: TextStyle(
+              color: context.appInk,
               fontSize: 13,
               fontWeight: FontWeight.w700,
             ),

@@ -18,7 +18,8 @@ class GetApplicationDetailsSuccessState extends ApplicationStates {
 
 class ApplicationActionSuccessState extends ApplicationStates {
   final String message;
-  ApplicationActionSuccessState(this.message);
+  final int applicationId;
+  ApplicationActionSuccessState(this.message, this.applicationId);
 }
 
 class ApplicationErrorState extends ApplicationStates {

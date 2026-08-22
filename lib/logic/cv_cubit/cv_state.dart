@@ -1,37 +1,38 @@
 import '../../data/models/cv_file_model.dart';
 
-abstract class CvStates {}
+class CvState {
+  final List<CvFileModel> files;
+  final bool loading;
+  final int? busyFileId;
+  final String? error;
+  final String? message;
+  final bool profileChanged;
 
-class CvInitialState extends CvStates {}
+  const CvState({
+    this.files = const [],
+    this.loading = false,
+    this.busyFileId,
+    this.error,
+    this.message,
+    this.profileChanged = false,
+  });
 
-class CvLoadingState extends CvStates {}
-
-class GetCvFilesSuccessState extends CvStates {
-  final List<CvFileModel> cvFiles;
-  GetCvFilesSuccessState(this.cvFiles);
-}
-
-class UploadCvSuccessState extends CvStates {
-  final CvFileModel cvFile;
-  UploadCvSuccessState(this.cvFile);
-}
-
-class GetParsedDataSuccessState extends CvStates {
-  final Map<String, dynamic> parsedData;
-  GetParsedDataSuccessState(this.parsedData);
-}
-
-class GetSuggestionsSuccessState extends CvStates {
-  final List<dynamic> suggestions;
-  GetSuggestionsSuccessState(this.suggestions);
-}
-
-class CvActionSuccessState extends CvStates {
-  final String message;
-  CvActionSuccessState(this.message);
-}
-
-class CvErrorState extends CvStates {
-  final String error;
-  CvErrorState(this.error);
+  CvState copyWith({
+    List<CvFileModel>? files,
+    bool? loading,
+    int? busyFileId,
+    bool clearBusyFile = false,
+    String? error,
+    bool clearError = false,
+    String? message,
+    bool clearMessage = false,
+    bool? profileChanged,
+  }) => CvState(
+    files: files ?? this.files,
+    loading: loading ?? this.loading,
+    busyFileId: clearBusyFile ? null : busyFileId ?? this.busyFileId,
+    error: clearError ? null : error ?? this.error,
+    message: clearMessage ? null : message ?? this.message,
+    profileChanged: profileChanged ?? this.profileChanged,
+  );
 }

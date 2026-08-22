@@ -3,7 +3,7 @@ import '../../utils/dio_methods.dart';
 
 class ApplicationApi {
   // --- Job Seeker Applications ---
-  
+
   // التقديم على وظيفة مع إرسال الـ CV والـ Cover Letter والموافقة
   Future<Response> applyToJob(int jobId, Map<String, dynamic> data) async {
     return await RemoteApi.post('/jobs/$jobId/applications', body: data);
@@ -18,19 +18,32 @@ class ApplicationApi {
   }
 
   Future<Response> withdrawApplication(int id, {String? reason}) async {
-    return await RemoteApi.post('/applications/$id/withdraw', body: {if (reason?.trim().isNotEmpty == true) 'reason': reason!.trim()});
+    return await RemoteApi.post(
+      '/applications/$id/withdraw',
+      body: {if (reason?.trim().isNotEmpty == true) 'note': reason!.trim()},
+    );
   }
 
+  Future<Response> getInformationRequest(int id) =>
+      RemoteApi.get('/information-requests/$id');
+
+  Future<Response> respondToInformationRequest(int id, FormData data) =>
+      RemoteApi.post('/information-requests/$id/respond', body: data);
+
   // --- Employer Applications ---
-  
+
   Future<Response> getJobApplications(int jobId) async {
     return await RemoteApi.get('/jobs/$jobId/applications');
   }
 
-  Future<Response> updateApplicationStatus(int id, String status, {String? note}) async {
-    return await RemoteApi.post('/applications/$id/status', body: {
-      'status': status,
-      'note': note,
-    });
+  Future<Response> updateApplicationStatus(
+    int id,
+    String status, {
+    String? note,
+  }) async {
+    return await RemoteApi.post(
+      '/applications/$id/status',
+      body: {'status': status, 'note': note},
+    );
   }
 }

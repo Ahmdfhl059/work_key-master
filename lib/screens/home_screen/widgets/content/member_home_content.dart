@@ -39,8 +39,8 @@ class MemberHomeContent extends StatelessWidget {
           const ExploreJobsScreen(initialTab: ExploreTab.forYou),
         ),
         emptyMessage: home.recommendationsAvailable
-            ? 'No new recommendations yet'
-            : 'Recommendations are not available yet',
+            ? 'home.no_new_recommendations'
+            : 'home.recommendations_unavailable',
       ),
       const SizedBox(height: 32),
       HomeCompaniesSection(companies: home.featuredCompanies),
@@ -52,7 +52,7 @@ class MemberHomeContent extends StatelessWidget {
           context,
           const ExploreJobsScreen(initialTab: ExploreTab.latest),
         ),
-        emptyMessage: 'No recent jobs right now',
+        emptyMessage: 'home.no_recent_jobs',
       ),
     ],
   );

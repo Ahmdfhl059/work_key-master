@@ -3,8 +3,12 @@ import 'package:work_key/data/models/applications_response_model.dart';
 import 'package:work_key/data/repo/application_repo.dart';
 import 'package:work_key/screens/applications/application_status_theme.dart';
 import 'package:work_key/screens/interviews/interview_details_screen.dart';
+import 'package:work_key/screens/applications/application_navigation.dart';
+import 'package:work_key/screens/applications/information_request_screen.dart';
 import 'package:work_key/shared/components/components.dart';
 import 'package:work_key/utils/constants.dart';
+
+import '../../../localization/app_localizations.dart';
 
 class ApplicationDetailsScreen extends StatefulWidget {
   final int applicationId;
@@ -28,11 +32,11 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: HomeColors.canvas,
+    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     appBar: AppBar(
-      backgroundColor: HomeColors.canvas,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       surfaceTintColor: Colors.transparent,
-      title: const Text('Application details'),
+      title: Text(context.tr('applications.details')),
     ),
     body: FutureBuilder<JobApplication>(
       future: future,
@@ -42,12 +46,8 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
         }
         if (snapshot.hasError || snapshot.data == null) {
           return Center(
-            child: DefaultButton(
-              width: 180,
-              background: HomeColors.purple,
-              text: 'Try again',
-              uppercase: false,
-              onPress: () => setState(
+            child: ModernRetryButton(
+              onRetry: () => setState(
                 () => future = repo.getTypedApplicationDetails(
                   widget.applicationId,
                 ),
@@ -69,20 +69,22 @@ class _ApplicationDetailsScreenState extends State<ApplicationDetailsScreen> {
         await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Withdraw application?'),
+            title: Text(context.tr('applications.withdraw_title')),
             content: TextField(
               controller: controller,
               maxLines: 3,
-              decoration: const InputDecoration(hintText: 'Optional reason'),
+              decoration: InputDecoration(
+                hintText: context.tr('applications.withdraw_reason'),
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
+                child: Text(context.tr('common.cancel')),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('Withdraw'),
+                child: Text(context.tr('applications.withdraw')),
               ),
             ],
           ),
@@ -105,7 +107,10 @@ class _DetailsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ApplicationStatusTheme.from(application.status.key);
+    final theme = ApplicationStatusTheme.from(
+      application.status.key,
+      colorScheme: Theme.of(context).colorScheme,
+    );
     return ResponsiveContent(
       maxWidth: 760,
       child: ListView(
@@ -115,12 +120,14 @@ class _DetailsContent extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF6554D9), Color(0xFF806DE4)],
+                begin: AlignmentDirectional.topStart,
+                end: AlignmentDirectional.bottomEnd,
+                colors: [Color(0xFF4D63D2), Color(0xFF7651B5)],
               ),
               borderRadius: BorderRadius.circular(25),
               boxShadow: const [
                 BoxShadow(
-                  color: Color(0x286554D9),
+                  color: Color(0x244D63D2),
                   blurRadius: 25,
                   offset: Offset(0, 12),
                 ),
@@ -162,7 +169,7 @@ class _DetailsContent extends StatelessWidget {
                           DefaultText(
                             text: application.job.company.name,
                             style: const TextStyle(
-                              color: Color(0xFFE9E4FF),
+                              color: Color(0xFFE8F7ED),
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
@@ -227,10 +234,10 @@ class _DetailsContent extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const DefaultText(
-                        text: 'Current status',
+                      DefaultText(
+                        text: context.tr('applications.current_status'),
                         style: TextStyle(
-                          color: HomeColors.muted,
+                          color: context.appMuted,
                           fontSize: 10.5,
                         ),
                       ),
@@ -249,23 +256,112 @@ class _DetailsContent extends StatelessWidget {
               ],
             ),
           ),
+          if (application.coverLetter.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _Section(
+              title: context.tr('jobs.cover_letter'),
+              icon: Icons.mail_outline_rounded,
+              child: DefaultText(
+                text: application.coverLetter,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  height: 1.55,
+                ),
+              ),
+            ),
+          ],
+          if (application.screeningAnswers.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _Section(
+              title: context.tr('applications.screening_answers'),
+              icon: Icons.rule_rounded,
+              child: Column(
+                children: application.screeningAnswers
+                    .map(
+                      (answer) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.question_mark_rounded,
+                                  size: 16,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.secondary,
+                                ),
+                                const SizedBox(width: 7),
+                                Expanded(
+                                  child: Text(
+                                    answer.question,
+                                    style: TextStyle(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 5),
+                            Padding(
+                              padding: const EdgeInsetsDirectional.only(
+                                start: 23,
+                              ),
+                              child: Text(
+                                answer.answer.isEmpty
+                                    ? context.tr('applications.no_answer')
+                                    : answer.answer,
+                                style: TextStyle(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+          ],
           if (application.nextAction != null) ...[
             const SizedBox(height: 16),
             _Section(
-              title: 'Next step',
+              title: context.tr('applications.next_step'),
               icon: Icons.bolt_rounded,
-              child: DefaultText(
-                text: application.nextAction!.label.isEmpty
-                    ? application.nextAction!.type.label
-                    : application.nextAction!.label,
-                style: const TextStyle(color: HomeColors.muted, height: 1.5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DefaultText(
+                    text: application.nextAction!.label.isEmpty
+                        ? application.nextAction!.type.label
+                        : application.nextAction!.label,
+                    style: TextStyle(color: context.appMuted, height: 1.5),
+                  ),
+                  const SizedBox(height: 10),
+                  FilledButton.icon(
+                    onPressed: () => ApplicationNavigation.openNextAction(
+                      context,
+                      application.nextAction!,
+                    ),
+                    icon: const Icon(Icons.arrow_forward_rounded),
+                    label: Text(context.tr('applications.open_request')),
+                  ),
+                ],
               ),
             ),
           ],
           if (application.statusHistory.isNotEmpty) ...[
             const SizedBox(height: 16),
             _Section(
-              title: 'Application timeline',
+              title: context.tr('applications.timeline'),
               icon: Icons.timeline_rounded,
               child: Column(
                 children: application.statusHistory.asMap().entries.map((
@@ -282,8 +378,8 @@ class _DetailsContent extends StatelessWidget {
                           Container(
                             width: 28,
                             height: 28,
-                            decoration: const BoxDecoration(
-                              color: HomeColors.softPurple,
+                            decoration: BoxDecoration(
+                              color: context.appSoftBrand,
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
@@ -296,7 +392,7 @@ class _DetailsContent extends StatelessWidget {
                             Container(
                               width: 2,
                               height: 45,
-                              color: HomeColors.divider,
+                              color: context.appDivider,
                             ),
                         ],
                       ),
@@ -309,8 +405,8 @@ class _DetailsContent extends StatelessWidget {
                             children: [
                               DefaultText(
                                 text: event.status.label,
-                                style: const TextStyle(
-                                  color: HomeColors.ink,
+                                style: TextStyle(
+                                  color: context.appInk,
                                   fontSize: 13,
                                   fontWeight: FontWeight.w800,
                                 ),
@@ -319,8 +415,8 @@ class _DetailsContent extends StatelessWidget {
                                 const SizedBox(height: 4),
                                 DefaultText(
                                   text: event.note!,
-                                  style: const TextStyle(
-                                    color: HomeColors.muted,
+                                  style: TextStyle(
+                                    color: context.appMuted,
                                     fontSize: 11.5,
                                     height: 1.4,
                                   ),
@@ -338,29 +434,28 @@ class _DetailsContent extends StatelessWidget {
           ],
           if (application.currentTest != null) ...[
             const SizedBox(height: 16),
-            const _Section(
-              title: 'Current test',
+            _Section(
+              title: context.tr('applications.current_test'),
               icon: Icons.quiz_outlined,
-              child: Text('Test details are available for this application.'),
+              child: Text(context.tr('applications.test_available')),
             ),
           ],
           if (application.relevantInterview != null) ...[
             const SizedBox(height: 16),
             _Section(
-              title: 'Interview',
+              title: context.tr('applications.interview'),
               icon: Icons.video_call_outlined,
               child: Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: DefaultText(
-                      text:
-                          'Your interview schedule and attendance details are ready.',
-                      style: TextStyle(color: HomeColors.muted, height: 1.45),
+                      text: context.tr('applications.interview_ready'),
+                      style: TextStyle(color: context.appMuted, height: 1.45),
                     ),
                   ),
                   const SizedBox(width: 10),
                   DefaultTextButton(
-                    text: 'View',
+                    text: context.tr('applications.view'),
                     onPressed: () {
                       final id = int.tryParse(
                         '${application.relevantInterview?['id'] ?? application.relevantInterview?['resource_id'] ?? ''}',
@@ -383,10 +478,32 @@ class _DetailsContent extends StatelessWidget {
           ],
           if (application.latestInformationRequest != null) ...[
             const SizedBox(height: 16),
-            const _Section(
-              title: 'Information request',
+            _Section(
+              title: context.tr('applications.information_request'),
               icon: Icons.description_outlined,
-              child: Text('The company requested additional information.'),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(context.tr('applications.information_requested')),
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      final request = application.latestInformationRequest!;
+                      final id = int.tryParse(
+                        '${request['id'] ?? request['resource_id'] ?? ''}',
+                      );
+                      if (id != null) {
+                        navigateTo(
+                          context,
+                          InformationRequestScreen(informationRequestId: id),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.description_outlined),
+                    label: Text(context.tr('applications.open_request')),
+                  ),
+                ],
+              ),
             ),
           ],
           if (application.allowedActions.contains('withdraw')) ...[
@@ -396,7 +513,7 @@ class _DetailsContent extends StatelessWidget {
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFFB44343),
               ),
-              child: const Text('Withdraw application'),
+              child: Text(context.tr('Withdraw application')),
             ),
           ],
         ],
@@ -451,9 +568,14 @@ class _Section extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(18),
     decoration: BoxDecoration(
-      color: Colors.white,
+      gradient: LinearGradient(
+        colors: [
+          Theme.of(context).colorScheme.surfaceContainer,
+          Theme.of(context).colorScheme.primaryContainer.withValues(alpha: .20),
+        ],
+      ),
       borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: HomeColors.divider),
+      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -464,7 +586,7 @@ class _Section extends StatelessWidget {
               width: 34,
               height: 34,
               decoration: BoxDecoration(
-                color: HomeColors.softPurple,
+                color: context.appSoftBrand,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, size: 18, color: HomeColors.purple),
@@ -473,8 +595,8 @@ class _Section extends StatelessWidget {
             Expanded(
               child: DefaultText(
                 text: title,
-                style: const TextStyle(
-                  color: HomeColors.ink,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 17,
                   fontWeight: FontWeight.w800,
                 ),
@@ -501,7 +623,7 @@ class _DetailsLoading extends StatelessWidget {
         Container(
           height: 210,
           decoration: BoxDecoration(
-            color: HomeColors.softPurple,
+            color: context.appSoftBrand,
             borderRadius: BorderRadius.circular(25),
           ),
         ),
@@ -512,7 +634,7 @@ class _DetailsLoading extends StatelessWidget {
             height: 115,
             margin: const EdgeInsets.only(bottom: 14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surfaceContainer,
               borderRadius: BorderRadius.circular(20),
             ),
           ),

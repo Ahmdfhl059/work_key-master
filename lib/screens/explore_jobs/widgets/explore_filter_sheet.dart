@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:work_key/data/models/job_filter_schema.dart';
 import 'package:work_key/logic/explore_jobs_cubit/explore_jobs_cubit.dart';
+import 'package:work_key/localization/app_localizations.dart';
 import 'package:work_key/shared/components/components.dart';
 import 'package:work_key/utils/constants.dart';
 
@@ -61,9 +62,9 @@ class _ExploreFilterSheetState extends State<ExploreFilterSheet> {
       height: (availableHeight * .92)
           .clamp(320.0, media.size.height * .92)
           .toDouble(),
-      decoration: const BoxDecoration(
-        color: HomeColors.canvas,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
       ),
       child: SafeArea(
         top: false,
@@ -73,11 +74,11 @@ class _ExploreFilterSheetState extends State<ExploreFilterSheet> {
               padding: const EdgeInsets.fromLTRB(20, 14, 12, 10),
               child: Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: DefaultText(
                       text: 'Filters',
                       style: TextStyle(
-                        color: HomeColors.ink,
+                        color: context.appInk,
                         fontSize: 22,
                         fontWeight: FontWeight.w900,
                       ),
@@ -93,7 +94,7 @@ class _ExploreFilterSheetState extends State<ExploreFilterSheet> {
                   ),
                   DefaultIconButton(
                     onPressed: () => Navigator.pop(context),
-                    color: HomeColors.ink,
+                    color: context.appInk,
                     size: 21,
                     icon: const Icon(Icons.close_rounded),
                   ),
@@ -178,7 +179,7 @@ class _ExploreFilterSheetState extends State<ExploreFilterSheet> {
                   value: option.key,
                   child: DefaultText(
                     text: option.value,
-                    style: const TextStyle(color: HomeColors.ink, fontSize: 13),
+                    style: TextStyle(color: context.appInk, fontSize: 13),
                   ),
                 ),
               )
@@ -194,8 +195,8 @@ class _ExploreFilterSheetState extends State<ExploreFilterSheet> {
           activeColor: HomeColors.purple,
           title: DefaultText(
             text: filter.label,
-            style: const TextStyle(
-              color: HomeColors.ink,
+            style: TextStyle(
+              color: context.appInk,
               fontSize: 14,
               fontWeight: FontWeight.w700,
             ),
@@ -211,8 +212,8 @@ class _ExploreFilterSheetState extends State<ExploreFilterSheet> {
           children: [
             DefaultText(
               text: filter.label,
-              style: const TextStyle(
-                color: HomeColors.ink,
+              style: TextStyle(
+                color: context.appInk,
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
               ),
@@ -265,10 +266,10 @@ class _ExploreFilterSheetState extends State<ExploreFilterSheet> {
   InputDecoration _decoration(String label) => InputDecoration(
     labelText: label,
     filled: true,
-    fillColor: Colors.white,
+    fillColor: Theme.of(context).colorScheme.surfaceContainer,
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
-      borderSide: const BorderSide(color: HomeColors.divider),
+      borderSide: BorderSide(color: context.appDivider),
     ),
   );
 }
@@ -311,7 +312,7 @@ class _SearchableOptionsFieldState extends State<_SearchableOptionsField> {
           onChanged: (value) => setState(() => query = value),
           decoration: InputDecoration(
             labelText: widget.label,
-            hintText: 'Search skills',
+            hintText: context.tr('explore.search_skills'),
             prefixIcon: const Icon(Icons.search_rounded),
             suffixIcon: selected == null
                 ? null
@@ -321,7 +322,7 @@ class _SearchableOptionsFieldState extends State<_SearchableOptionsField> {
                   ),
             helperText: selected == null ? null : 'Selected: ${selected.value}',
             filled: true,
-            fillColor: Colors.white,
+            fillColor: Theme.of(context).colorScheme.surfaceContainer,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
           ),
         ),
@@ -330,9 +331,9 @@ class _SearchableOptionsFieldState extends State<_SearchableOptionsField> {
             margin: const EdgeInsets.only(top: 6),
             constraints: const BoxConstraints(maxHeight: 180),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surfaceContainer,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: HomeColors.divider),
+              border: Border.all(color: context.appDivider),
             ),
             child: ListView(
               shrinkWrap: true,
@@ -373,9 +374,9 @@ class _SortField extends StatelessWidget {
   Widget build(BuildContext context) => DropdownButtonFormField<JobSortOption>(
     value: value,
     decoration: InputDecoration(
-      labelText: 'Sort by',
+      labelText: context.tr('common.sort_by'),
       filled: true,
-      fillColor: Colors.white,
+      fillColor: Theme.of(context).colorScheme.surfaceContainer,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
     ),
     items: options
@@ -450,7 +451,7 @@ class _RemoteOptionsFieldState extends State<_RemoteOptionsField> {
                 )
               : const Icon(Icons.search_rounded),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: Theme.of(context).colorScheme.surfaceContainer,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
         ),
       ),

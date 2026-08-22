@@ -12,7 +12,7 @@ class AppLocalization {
   }
 
   static LocalizationsDelegate<AppLocalization> delegate =
-  _AppLocalizationsDelegate();
+      _AppLocalizationsDelegate();
   late Map<String, String> _localizedString;
 
   Future loadJsonLanguage() async {

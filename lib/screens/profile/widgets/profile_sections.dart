@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:work_key/data/models/profile_model.dart';
+import 'package:work_key/localization/app_localizations.dart';
 import 'package:work_key/screens/profile/profile_strings.dart';
 import 'package:work_key/shared/components/components.dart';
 import 'package:work_key/utils/constants.dart';
@@ -8,13 +9,13 @@ class ProfileHero extends StatelessWidget {
   final ProfileModel profile;
   final String editLabel;
   final VoidCallback edit;
-  final VoidCallback onAvatarTap;
+  final VoidCallback uploadAvatar;
   const ProfileHero({
     super.key,
     required this.profile,
     required this.editLabel,
     required this.edit,
-    required this.onAvatarTap,
+    required this.uploadAvatar,
   });
   @override
   Widget build(BuildContext context) => Container(
@@ -23,12 +24,12 @@ class ProfileHero extends StatelessWidget {
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [Color(0xFF5946CF), Color(0xFF8874E8)],
+        colors: [Color(0xFF29B148), Color(0xFF0FA348)],
       ),
       borderRadius: BorderRadius.circular(27),
       boxShadow: const [
         BoxShadow(
-          color: Color(0x2A6554D9),
+          color: Color(0x2A18A949),
           blurRadius: 28,
           offset: Offset(0, 13),
         ),
@@ -40,7 +41,7 @@ class ProfileHero extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             GestureDetector(
-              onTap: onAvatarTap,
+              onTap: uploadAvatar,
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -52,7 +53,7 @@ class ProfileHero extends StatelessWidget {
                         : NetworkImage(profile.user.avatarUrl!),
                     onForegroundImageError: profile.user.avatarUrl == null
                         ? null
-                        : (_, __) {},
+                        : (_, _) {},
                     child: profile.user.avatarUrl == null
                         ? Text(
                             _initials(profile.user.name),
@@ -64,16 +65,16 @@ class ProfileHero extends StatelessWidget {
                           )
                         : null,
                   ),
-                  const PositionedDirectional(
-                    end: -2,
-                    bottom: -2,
+                  PositionedDirectional(
+                    end: -3,
+                    bottom: -3,
                     child: CircleAvatar(
-                      radius: 12,
+                      radius: 13,
                       backgroundColor: Colors.white,
                       child: Icon(
                         Icons.camera_alt_rounded,
-                        color: HomeColors.purple,
-                        size: 13,
+                        size: 15,
+                        color: HomeColors.brand,
                       ),
                     ),
                   ),
@@ -87,7 +88,7 @@ class ProfileHero extends StatelessWidget {
                 children: [
                   DefaultText(
                     text: profile.user.name.isEmpty
-                        ? 'Job seeker'
+                        ? context.tr('profile.job_seeker')
                         : profile.user.name,
                     style: const TextStyle(
                       color: Colors.white,
@@ -99,10 +100,10 @@ class ProfileHero extends StatelessWidget {
                   const SizedBox(height: 5),
                   DefaultText(
                     text: profile.headline.isEmpty
-                        ? profile.careerLevel
+                        ? context.tr('profile.add_headline')
                         : profile.headline,
                     style: const TextStyle(
-                      color: Color(0xFFE9E4FF),
+                      color: Color(0xFFE8F7ED),
                       fontSize: 12.5,
                       height: 1.4,
                     ),
@@ -152,13 +153,23 @@ class ProfileHero extends StatelessWidget {
             Expanded(
               child: _Metric(
                 '${profile.yearsOfExperience}',
-                'Years experience',
+                context.tr('profile.years_experience'),
               ),
             ),
             Container(width: 1, height: 35, color: Colors.white24),
-            Expanded(child: _Metric('${profile.skills.length}', 'Skills')),
+            Expanded(
+              child: _Metric(
+                '${profile.skills.length}',
+                context.tr('profile.skills'),
+              ),
+            ),
             Container(width: 1, height: 35, color: Colors.white24),
-            Expanded(child: _Metric('${profile.experiences.length}', 'Roles')),
+            Expanded(
+              child: _Metric(
+                '${profile.experiences.length}',
+                context.tr('profile.roles'),
+              ),
+            ),
           ],
         ),
       ],
@@ -200,10 +211,12 @@ class _Metric extends StatelessWidget {
 
 class ProfileOverview extends StatelessWidget {
   final ProfileModel profile;
+  final VoidCallback onEditProfile;
   final VoidCallback onManageSkills, onManageExperience, onManageEducation;
   const ProfileOverview({
     super.key,
     required this.profile,
+    required this.onEditProfile,
     required this.onManageSkills,
     required this.onManageExperience,
     required this.onManageEducation,
@@ -216,10 +229,12 @@ class ProfileOverview extends StatelessWidget {
         ProfileSection(
           title: s.about,
           icon: Icons.person_outline_rounded,
+          actionLabel: s.edit,
+          onAction: onEditProfile,
           child: DefaultText(
             text: profile.summary.isEmpty ? s.emptySummary : profile.summary,
-            style: const TextStyle(
-              color: HomeColors.muted,
+            style: TextStyle(
+              color: context.appMuted,
               fontSize: 13,
               height: 1.65,
             ),
@@ -229,10 +244,10 @@ class ProfileOverview extends StatelessWidget {
         ProfileSection(
           title: s.skills,
           icon: Icons.auto_awesome_rounded,
-          actionLabel: 'Manage',
+          actionLabel: context.tr('profile.manage'),
           onAction: onManageSkills,
           child: profile.skills.isEmpty
-              ? const Text('Add skills to improve your recommendations.')
+              ? Text(context.tr('profile.empty_skills'))
               : Wrap(
                   spacing: 7,
                   runSpacing: 7,
@@ -244,7 +259,7 @@ class ProfileOverview extends StatelessWidget {
                             vertical: 7,
                           ),
                           decoration: BoxDecoration(
-                            color: HomeColors.softPurple,
+                            color: context.appSoftBrand,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
@@ -264,10 +279,10 @@ class ProfileOverview extends StatelessWidget {
         ProfileSection(
           title: s.experience,
           icon: Icons.work_outline_rounded,
-          actionLabel: 'Manage',
+          actionLabel: context.tr('profile.manage'),
           onAction: onManageExperience,
           child: profile.experiences.isEmpty
-              ? const Text('Add your work experience.')
+              ? Text(context.tr('profile.empty_experience'))
               : Column(
                   children: profile.experiences
                       .map(
@@ -275,7 +290,7 @@ class ProfileOverview extends StatelessWidget {
                           title: item.title,
                           subtitle: item.companyName,
                           detail:
-                              '${item.startDate} — ${item.isCurrent ? 'Present' : item.endDate}',
+                              '${item.startDate} — ${item.isCurrent ? context.tr('profile.present') : item.endDate}',
                         ),
                       )
                       .toList(),
@@ -285,10 +300,10 @@ class ProfileOverview extends StatelessWidget {
         ProfileSection(
           title: s.education,
           icon: Icons.school_outlined,
-          actionLabel: 'Manage',
+          actionLabel: context.tr('profile.manage'),
           onAction: onManageEducation,
           child: profile.education.isEmpty
-              ? const Text('Add your education.')
+              ? Text(context.tr('profile.empty_education'))
               : Column(
                   children: profile.education
                       .map(
@@ -306,52 +321,160 @@ class ProfileOverview extends StatelessWidget {
         ProfileSection(
           title: s.preferences,
           icon: Icons.tune_rounded,
-          child: Wrap(
-            spacing: 7,
-            runSpacing: 7,
-            children:
-                [
-                      profile.currentStatus,
-                      profile.careerLevel,
-                      profile.educationLevel,
-                      ...profile.preferredWorkTypes,
-                      ...profile.preferredJobFields,
-                    ]
-                    .where((e) => e.isNotEmpty)
-                    .map(
-                      (text) => Chip(
-                        label: Text(text),
-                        backgroundColor: const Color(0xFFF3F5F9),
-                        side: BorderSide.none,
-                      ),
-                    )
-                    .toList(),
+          actionLabel: s.edit,
+          onAction: onEditProfile,
+          child: Column(
+            children: [
+              _ProfileValueRow(
+                icon: Icons.location_city_outlined,
+                label: context.tr('profile.city'),
+                value: profile.cityName,
+              ),
+              _ProfileValueRow(
+                icon: Icons.location_on_outlined,
+                label: context.tr('profile.location_details'),
+                value: profile.location,
+              ),
+              _ProfileValueRow(
+                icon: Icons.event_available_outlined,
+                label: context.tr('profile.availability'),
+                value: _availabilityLabel(context, profile),
+                isLast: true,
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 14),
         ProfileSection(
           title: s.contact,
           icon: Icons.contact_mail_outlined,
+          actionLabel: s.edit,
+          onAction: onEditProfile,
           child: Column(
             children: [
-              if (profile.user.email.isNotEmpty)
-                ContactRow(Icons.email_outlined, profile.user.email),
-              if ((profile.phone.isEmpty ? profile.user.phone : profile.phone)
-                  .isNotEmpty)
-                ContactRow(
-                  Icons.phone_outlined,
-                  profile.phone.isEmpty ? profile.user.phone : profile.phone,
-                ),
-              if (profile.portfolioUrl.isNotEmpty)
-                ContactRow(Icons.language_rounded, profile.portfolioUrl),
-              if (profile.linkedinUrl.isNotEmpty)
-                ContactRow(Icons.link_rounded, profile.linkedinUrl),
-              if (profile.githubUrl.isNotEmpty)
-                ContactRow(Icons.code_rounded, profile.githubUrl),
+              _ProfileValueRow(
+                icon: Icons.email_outlined,
+                label: context.tr('profile.account_email'),
+                value: profile.user.email,
+                locked: true,
+              ),
+              _ProfileValueRow(
+                icon: Icons.phone_outlined,
+                label: context.tr('profile.phone'),
+                value: profile.phone.isEmpty
+                    ? profile.user.phone
+                    : profile.phone,
+              ),
+              _ProfileValueRow(
+                icon: Icons.language_rounded,
+                label: context.tr('profile.portfolio_url'),
+                value: profile.portfolioUrl,
+              ),
+              _ProfileValueRow(
+                icon: Icons.link_rounded,
+                label: context.tr('profile.linkedin_url'),
+                value: profile.linkedinUrl,
+              ),
+              _ProfileValueRow(
+                icon: Icons.code_rounded,
+                label: context.tr('profile.github_url'),
+                value: profile.githubUrl,
+                isLast: true,
+              ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  static String _availabilityLabel(BuildContext context, ProfileModel profile) {
+    final label = switch (profile.availabilityStatus) {
+      'available_now' => context.tr('profile.available_now'),
+      'available_from_date' => context.tr('profile.available_from_date'),
+      'not_available' => context.tr('profile.not_available'),
+      _ => context.tr('profile.not_specified'),
+    };
+    if (profile.availabilityStatus == 'available_from_date' &&
+        profile.availableFrom.isNotEmpty) {
+      return '$label · ${profile.availableFrom}';
+    }
+    return label;
+  }
+}
+
+class _ProfileValueRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final bool locked;
+  final bool isLast;
+
+  const _ProfileValueRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.locked = false,
+    this.isLast = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final shownValue = value.trim().isEmpty
+        ? context.tr('profile.tap_edit_to_add')
+        : value;
+    return Padding(
+      padding: EdgeInsets.only(bottom: isLast ? 0 : 13),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 19, color: scheme.primary),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: scheme.onSurfaceVariant,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  shownValue,
+                  style: TextStyle(
+                    color: value.trim().isEmpty
+                        ? scheme.onSurfaceVariant
+                        : scheme.onSurface,
+                    fontSize: 12.5,
+                    fontWeight: value.trim().isEmpty
+                        ? FontWeight.w400
+                        : FontWeight.w700,
+                    fontStyle: value.trim().isEmpty
+                        ? FontStyle.italic
+                        : FontStyle.normal,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (locked) ...[
+            const SizedBox(width: 8),
+            Tooltip(
+              message: context.tr('profile.email_managed_by_account'),
+              child: Icon(
+                Icons.lock_outline_rounded,
+                size: 16,
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -371,63 +494,107 @@ class ProfileSection extends StatelessWidget {
     this.onAction,
   });
   @override
-  Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    padding: const EdgeInsets.all(18),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(21),
-      border: Border.all(color: HomeColors.divider),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x0715213A),
-          blurRadius: 15,
-          offset: Offset(0, 7),
-        ),
-      ],
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 35,
-              height: 35,
-              decoration: BoxDecoration(
-                color: HomeColors.softPurple,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: HomeColors.purple, size: 18),
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final accent = _sectionAccent(icon, scheme);
+    return Container(
+      width: double.infinity,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainer,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: .62)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+              alpha: Theme.of(context).brightness == Brightness.dark
+                  ? .28
+                  : .075,
             ),
-            const SizedBox(width: 9),
-            Expanded(
-              child: DefaultText(
-                text: title,
-                style: const TextStyle(
-                  color: HomeColors.ink,
-                  fontSize: 16.5,
-                  fontWeight: FontWeight.w900,
+            blurRadius: 30,
+            offset: const Offset(0, 14),
+            spreadRadius: -8,
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          PositionedDirectional(
+            start: 0,
+            top: 0,
+            bottom: 0,
+            child: Container(width: 4, color: accent),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 19, 18, 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            accent.withValues(alpha: .18),
+                            accent.withValues(alpha: .07),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(13),
+                        border: Border.all(
+                          color: accent.withValues(alpha: .18),
+                        ),
+                      ),
+                      child: Icon(icon, color: accent, size: 21),
+                    ),
+                    const SizedBox(width: 9),
+                    Expanded(
+                      child: DefaultText(
+                        text: title,
+                        style: TextStyle(
+                          color: scheme.onSurface,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -.25,
+                        ),
+                      ),
+                    ),
+                    if (actionLabel != null)
+                      DefaultTextButton(
+                        text: actionLabel!,
+                        onPressed: onAction,
+                        textStyle: TextStyle(
+                          color: accent,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                  ],
                 ),
-              ),
+                const SizedBox(height: 17),
+                child,
+              ],
             ),
-            if (actionLabel != null)
-              DefaultTextButton(
-                text: actionLabel!,
-                onPressed: onAction,
-                textStyle: const TextStyle(
-                  color: HomeColors.purple,
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 13),
-        child,
-      ],
-    ),
-  );
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _sectionAccent(IconData value, ColorScheme scheme) {
+    final palette = <Color>[
+      scheme.primary,
+      const Color(0xFF087D68),
+      const Color(0xFF4B67C8),
+      const Color(0xFFE88C19),
+      const Color(0xFF8C55C7),
+    ];
+    return palette[value.codePoint.abs() % palette.length];
+  }
 }
 
 class ProfileTimelineItem extends StatelessWidget {
@@ -460,8 +627,8 @@ class ProfileTimelineItem extends StatelessWidget {
             children: [
               DefaultText(
                 text: title,
-                style: const TextStyle(
-                  color: HomeColors.ink,
+                style: TextStyle(
+                  color: context.appInk,
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                 ),
@@ -470,10 +637,7 @@ class ProfileTimelineItem extends StatelessWidget {
                 const SizedBox(height: 3),
                 DefaultText(
                   text: subtitle,
-                  style: const TextStyle(
-                    color: HomeColors.muted,
-                    fontSize: 11.5,
-                  ),
+                  style: TextStyle(color: context.appMuted, fontSize: 11.5),
                 ),
               ],
               if (detail.replaceAll('—', '').trim().isNotEmpty) ...[
@@ -504,12 +668,12 @@ class ContactRow extends StatelessWidget {
     padding: const EdgeInsets.only(bottom: 10),
     child: Row(
       children: [
-        Icon(icon, size: 17, color: HomeColors.muted),
+        Icon(icon, size: 17, color: context.appMuted),
         const SizedBox(width: 9),
         Expanded(
           child: DefaultText(
             text: text,
-            style: const TextStyle(color: HomeColors.ink, fontSize: 12.5),
+            style: TextStyle(color: context.appInk, fontSize: 12.5),
           ),
         ),
       ],

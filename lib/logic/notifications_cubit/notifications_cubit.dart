@@ -4,29 +4,56 @@ import 'notifications_state.dart';
 
 class NotificationsCubit extends Cubit<NotificationsStates> {
   final NotificationsRepo notificationsRepo;
-  NotificationsCubit(this.notificationsRepo) : super(NotificationsInitialState());
+  int unreadCount = 0;
+  NotificationsCubit(this.notificationsRepo)
+    : super(NotificationsInitialState());
 
-  static NotificationsCubit get(context) => BlocProvider.of(context);
+  static NotificationsCubit get(dynamic context) => BlocProvider.of(context);
 
-  void getNotifications() {
+  Future<void> getNotifications() async {
     emit(NotificationsLoadingState());
-    notificationsRepo.getNotifications().then((list) {
+    try {
+      final list = await notificationsRepo.getNotifications();
       emit(GetNotificationsSuccessState(list));
-    }).catchError((error) {
+    } catch (error) {
       emit(NotificationsErrorState(error.toString()));
-    });
+    }
   }
 
   void getUnreadCount() {
     notificationsRepo.getUnreadCount().then((count) {
+      unreadCount = count;
       emit(GetUnreadCountSuccessState(count));
     });
   }
 
-  void markAsRead(int id) {
-    notificationsRepo.markAsRead(id).then((value) {
-      getNotifications(); // تحديث القائمة بعد القراءة
-      getUnreadCount();   // تحديث العداد
-    });
+  Future<void> markAsRead(int id) async {
+    try {
+      await notificationsRepo.markAsRead(id);
+      await getNotifications();
+      getUnreadCount();
+    } catch (error) {
+      emit(NotificationsErrorState(error.toString()));
+    }
+  }
+
+  Future<void> markAllAsRead() async {
+    try {
+      await notificationsRepo.markAllAsRead();
+      await getNotifications();
+      getUnreadCount();
+    } catch (error) {
+      emit(NotificationsErrorState(error.toString()));
+    }
+  }
+
+  Future<void> deleteNotification(int id) async {
+    try {
+      await notificationsRepo.deleteNotification(id);
+      await getNotifications();
+      getUnreadCount();
+    } catch (error) {
+      emit(NotificationsErrorState(error.toString()));
+    }
   }
 }

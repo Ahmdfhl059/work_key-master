@@ -2,8 +2,8 @@ class NotificationModel {
   String? message;
   final int id;
   String type;
-  String data;
-  String readAt;
+  Map<String, dynamic> data;
+  String? readAt;
   String createdAt;
 
   NotificationModel({
@@ -11,7 +11,7 @@ class NotificationModel {
     required this.id,
     required this.type,
     required this.data,
-    required this.readAt,
+    this.readAt,
     required this.createdAt,
   });
 
@@ -19,8 +19,7 @@ class NotificationModel {
     id: -1,
     message: '',
     type: '',
-    data: '',
-    readAt: '',
+    data: const {},
     createdAt: '',
   );
 
@@ -37,12 +36,16 @@ class NotificationModel {
 
   factory NotificationModel.fromMap(Map<String, dynamic> map) {
     return NotificationModel(
-      id: map['id'] ?? -1,
+      id: int.tryParse('${map['id'] ?? ''}') ?? -1,
       message: map['message'] ?? '',
       type: map['type'] ?? '',
-      data: map['data']?.toString() ?? '',
-      readAt: map['read_at'] ?? '',
-      createdAt: map['created_at'] ?? '',
+      data: map['data'] is Map
+          ? Map<String, dynamic>.from(map['data'])
+          : const {},
+      readAt: map['read_at']?.toString(),
+      createdAt: map['created_at']?.toString() ?? '',
     );
   }
+
+  bool get isRead => readAt != null && readAt!.isNotEmpty;
 }

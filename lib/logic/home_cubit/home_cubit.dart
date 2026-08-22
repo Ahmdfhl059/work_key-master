@@ -19,11 +19,13 @@ class HomeCubit extends Cubit<HomeStates> {
       final home = await homeRepo.getHome();
       emit(HomeSuccessState(home));
     } on HomeRequestException catch (e) {
-      emit(HomeErrorState(
-        e.message,
-        statusCode: e.statusCode,
-        errorCode: e.errorCode,
-      ));
+      emit(
+        HomeErrorState(
+          e.message,
+          statusCode: e.statusCode,
+          errorCode: e.errorCode,
+        ),
+      );
     } catch (e) {
       emit(HomeErrorState(e.toString()));
     }

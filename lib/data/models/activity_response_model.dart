@@ -1,3 +1,5 @@
+import '../../utils/media_url.dart';
+
 class ActivityResponse {
   final ActivitySummary summary;
   final List<ActivityItem> upcomingSchedule;
@@ -254,7 +256,14 @@ class ActivityCompanySummary {
       ActivityCompanySummary(
         _int(map['id'], -1),
         '${map['name'] ?? ''}',
-        map['logo_url']?.toString() ?? map['logo']?.toString(),
+        resolveMediaUrl(
+          map['logo_url'] ??
+              map['logo'] ??
+              map['company_logo_url'] ??
+              map['logo_path'] ??
+              map['company_logo'] ??
+              (map['media'] is Map ? (map['media'] as Map)['logo'] : null),
+        ),
       );
 }
 

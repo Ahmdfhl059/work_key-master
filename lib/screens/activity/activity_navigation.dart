@@ -9,9 +9,16 @@ abstract final class ActivityNavigation {
     final action = item.action;
     if (action == null) return;
     if (action.type.key == 'view_application' && action.target.id != null) {
-      await navigateTo(context, ApplicationDetailsScreen(applicationId: action.target.id!));
+      await navigateTo(
+        context,
+        ApplicationDetailsScreen(applicationId: action.target.id!),
+      );
       return;
     }
-    HomeNavigation.openTarget(context, action.target.type, id: action.target.id?.toString());
+    HomeNavigation.openTarget(
+      context,
+      action.target.type,
+      id: action.target.id?.toString(),
+    );
   }
 }

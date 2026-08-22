@@ -27,3 +27,8 @@ class ResetPasswordSuccessState extends AuthStates {
   final String message;
   ResetPasswordSuccessState(this.message);
 }
+
+class AccountVerificationCodeSentState extends AuthStates {
+  final String message;
+  AccountVerificationCodeSentState(this.message);
+}

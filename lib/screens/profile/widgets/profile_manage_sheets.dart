@@ -4,13 +4,15 @@ import 'package:work_key/data/models/education_model.dart';
 import 'package:work_key/data/models/experience_model.dart';
 import 'package:work_key/data/models/profile_model.dart';
 import 'package:work_key/logic/profile_cubit/profile_cubit.dart';
+import 'package:work_key/localization/app_localizations.dart';
+import 'package:work_key/shared/components/app_snackbar.dart';
 import 'package:work_key/shared/components/components.dart';
 import 'package:work_key/utils/constants.dart';
 
 Future<void> showExperienceManager(BuildContext context, ProfileModel profile) {
   return _showManager(
     context,
-    title: 'Manage experience',
+    title: context.tr('profile.manage_experience'),
     items: profile.experiences
         .map(
           (item) => _ManageItem(
@@ -18,8 +20,10 @@ Future<void> showExperienceManager(BuildContext context, ProfileModel profile) {
             subtitle: item.companyName,
             onEdit: () => _experienceForm(context, item),
             onDelete: () async {
-              await context.read<ProfileCubit>().deleteExperience(item.id);
-              if (context.mounted) Navigator.pop(context);
+              final deleted = await context
+                  .read<ProfileCubit>()
+                  .deleteExperience(item.id);
+              if (deleted && context.mounted) Navigator.pop(context);
             },
           ),
         )
@@ -31,7 +35,7 @@ Future<void> showExperienceManager(BuildContext context, ProfileModel profile) {
 Future<void> showEducationManager(BuildContext context, ProfileModel profile) {
   return _showManager(
     context,
-    title: 'Manage education',
+    title: context.tr('profile.manage_education'),
     items: profile.education
         .map(
           (item) => _ManageItem(
@@ -39,8 +43,10 @@ Future<void> showEducationManager(BuildContext context, ProfileModel profile) {
             subtitle: item.institution,
             onEdit: () => _educationForm(context, item),
             onDelete: () async {
-              await context.read<ProfileCubit>().deleteEducation(item.id);
-              if (context.mounted) Navigator.pop(context);
+              final deleted = await context
+                  .read<ProfileCubit>()
+                  .deleteEducation(item.id);
+              if (deleted && context.mounted) Navigator.pop(context);
             },
           ),
         )
@@ -59,7 +65,7 @@ Future<void> showSkillsManager(BuildContext context, ProfileModel profile) {
     builder: (_) => BlocProvider.value(
       value: cubit,
       child: Material(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
         child: SafeArea(
           child: Padding(
@@ -68,7 +74,7 @@ Future<void> showSkillsManager(BuildContext context, ProfileModel profile) {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const _ManagerHeader(title: 'Manage skills'),
+                _ManagerHeader(title: context.tr('profile.manage_skills')),
                 const SizedBox(height: 12),
                 if (profile.skills.isNotEmpty)
                   Wrap(
@@ -79,8 +85,10 @@ Future<void> showSkillsManager(BuildContext context, ProfileModel profile) {
                           (skill) => InputChip(
                             label: Text(skill.name),
                             onDeleted: () async {
-                              await cubit.detachSkill(skill.id);
-                              if (context.mounted) Navigator.pop(context);
+                              final deleted = await cubit.detachSkill(skill.id);
+                              if (deleted && context.mounted) {
+                                Navigator.pop(context);
+                              }
                             },
                           ),
                         )
@@ -89,7 +97,7 @@ Future<void> showSkillsManager(BuildContext context, ProfileModel profile) {
                 const SizedBox(height: 16),
                 DefaultButton(
                   background: HomeColors.purple,
-                  text: 'Add skill',
+                  text: context.tr('profile.add_skill'),
                   uppercase: false,
                   onPress: () async {
                     final skills = await cubit.availableSkills();
@@ -99,8 +107,8 @@ Future<void> showSkillsManager(BuildContext context, ProfileModel profile) {
                       delegate: _SkillSearch(skills),
                     );
                     if (selected != null) {
-                      await cubit.attachSkill(selected);
-                      if (context.mounted) Navigator.pop(context);
+                      final attached = await cubit.attachSkill(selected);
+                      if (attached && context.mounted) Navigator.pop(context);
                     }
                   },
                 ),
@@ -125,7 +133,7 @@ Future<void> _showManager(
     useSafeArea: true,
     backgroundColor: Colors.transparent,
     builder: (_) => Material(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
       child: SafeArea(
         child: Padding(
@@ -136,16 +144,16 @@ Future<void> _showManager(
               _ManagerHeader(title: title),
               Flexible(
                 child: items.isEmpty
-                    ? const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 30),
-                        child: Text('No items added yet.'),
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 30),
+                        child: Text(context.tr('profile.no_items')),
                       )
                     : ListView(shrinkWrap: true, children: items),
               ),
               const SizedBox(height: 12),
               DefaultButton(
                 background: HomeColors.purple,
-                text: 'Add new',
+                text: context.tr('profile.add_new'),
                 uppercase: false,
                 onPress: onAdd,
               ),
@@ -166,8 +174,8 @@ class _ManagerHeader extends StatelessWidget {
       Expanded(
         child: DefaultText(
           text: title,
-          style: const TextStyle(
-            color: HomeColors.ink,
+          style: TextStyle(
+            color: context.appInk,
             fontSize: 20,
             fontWeight: FontWeight.w900,
           ),
@@ -193,7 +201,7 @@ class _ManageItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListTile(
     contentPadding: EdgeInsets.zero,
-    title: Text(title.isEmpty ? 'Untitled' : title),
+    title: Text(title.isEmpty ? context.tr('profile.untitled') : title),
     subtitle: subtitle.isEmpty ? null : Text(subtitle),
     trailing: Row(
       mainAxisSize: MainAxisSize.min,
@@ -224,47 +232,62 @@ Future<void> _experienceForm(
     context: context,
     builder: (dialogContext) => StatefulBuilder(
       builder: (context, setDialogState) => AlertDialog(
-        title: Text(item == null ? 'Add experience' : 'Edit experience'),
+        title: Text(
+          context.tr(
+            item == null ? 'profile.add_experience' : 'profile.edit_experience',
+          ),
+        ),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _field(title, 'Job title'),
-              _field(company, 'Company'),
-              _field(location, 'Location'),
-              _field(start, 'Start date (YYYY-MM-DD)'),
-              if (!current) _field(end, 'End date (YYYY-MM-DD)'),
+              _field(title, context.tr('profile.job_title')),
+              _field(company, context.tr('profile.company')),
+              _field(location, context.tr('profile.location_details')),
+              _field(start, context.tr('profile.start_date')),
+              if (!current) _field(end, context.tr('profile.end_date')),
               CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
                 value: current,
-                title: const Text('I currently work here'),
+                title: Text(context.tr('profile.currently_work_here')),
                 onChanged: (value) =>
                     setDialogState(() => current = value ?? false),
               ),
-              _field(description, 'Description', lines: 3),
+              _field(description, context.tr('profile.description'), lines: 3),
             ],
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(context.tr('common.cancel')),
           ),
           FilledButton(
             onPressed: () async {
-              await context.read<ProfileCubit>().saveExperience(item?.id, {
-                'title': title.text.trim(),
-                'company_name': company.text.trim(),
-                'location': location.text.trim(),
-                'start_date': start.text.trim(),
-                'end_date': current ? null : end.text.trim(),
-                'is_current': current,
-                'description': description.text.trim(),
-              });
-              if (dialogContext.mounted) Navigator.pop(dialogContext);
-              if (context.mounted) Navigator.pop(context);
+              if (title.text.trim().isEmpty || company.text.trim().isEmpty) {
+                AppSnackBar.error(
+                  dialogContext,
+                  context.tr('profile.experience_required'),
+                );
+                return;
+              }
+              final saved = await context
+                  .read<ProfileCubit>()
+                  .saveExperience(item?.id, {
+                    'title': title.text.trim(),
+                    'company_name': company.text.trim(),
+                    'location': _nullable(location.text),
+                    'start_date': _nullable(start.text),
+                    'end_date': current ? null : _nullable(end.text),
+                    'is_current': current,
+                    'description': _nullable(description.text),
+                  });
+              if (saved && dialogContext.mounted) {
+                Navigator.pop(dialogContext);
+              }
+              if (saved && context.mounted) Navigator.pop(context);
             },
-            child: const Text('Save'),
+            child: Text(context.tr('common.save')),
           ),
         ],
       ),
@@ -292,39 +315,52 @@ Future<void> _educationForm(BuildContext context, EducationModel? item) async {
   await showDialog<void>(
     context: context,
     builder: (dialogContext) => AlertDialog(
-      title: Text(item == null ? 'Add education' : 'Edit education'),
+      title: Text(
+        context.tr(
+          item == null ? 'profile.add_education' : 'profile.edit_education',
+        ),
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _field(institution, 'Institution'),
-            _field(degree, 'Degree'),
-            _field(field, 'Field of study'),
-            _field(start, 'Start date (YYYY-MM-DD)'),
-            _field(end, 'End date (YYYY-MM-DD)'),
-            _field(description, 'Description', lines: 3),
+            _field(institution, context.tr('profile.institution')),
+            _field(degree, context.tr('profile.degree')),
+            _field(field, context.tr('profile.field_of_study')),
+            _field(start, context.tr('profile.start_date')),
+            _field(end, context.tr('profile.end_date')),
+            _field(description, context.tr('profile.description'), lines: 3),
           ],
         ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(dialogContext),
-          child: const Text('Cancel'),
+          child: Text(context.tr('common.cancel')),
         ),
         FilledButton(
           onPressed: () async {
-            await context.read<ProfileCubit>().saveEducation(item?.id, {
-              'institution': institution.text.trim(),
-              'degree': degree.text.trim(),
-              'field_of_study': field.text.trim(),
-              'start_date': start.text.trim(),
-              'end_date': end.text.trim(),
-              'description': description.text.trim(),
-            });
-            if (dialogContext.mounted) Navigator.pop(dialogContext);
-            if (context.mounted) Navigator.pop(context);
+            if (institution.text.trim().isEmpty) {
+              AppSnackBar.error(
+                dialogContext,
+                context.tr('profile.education_required'),
+              );
+              return;
+            }
+            final saved = await context
+                .read<ProfileCubit>()
+                .saveEducation(item?.id, {
+                  'institution': institution.text.trim(),
+                  'degree': _nullable(degree.text),
+                  'field_of_study': _nullable(field.text),
+                  'start_date': _nullable(start.text),
+                  'end_date': _nullable(end.text),
+                  'description': _nullable(description.text),
+                });
+            if (saved && dialogContext.mounted) Navigator.pop(dialogContext);
+            if (saved && context.mounted) Navigator.pop(context);
           },
-          child: const Text('Save'),
+          child: Text(context.tr('common.save')),
         ),
       ],
     ),
@@ -356,6 +392,11 @@ Widget _field(
     ),
   ),
 );
+
+String? _nullable(String value) {
+  final text = value.trim();
+  return text.isEmpty ? null : text;
+}
 
 class _SkillSearch extends SearchDelegate<int?> {
   final List<dynamic> skills;

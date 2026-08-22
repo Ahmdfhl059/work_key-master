@@ -54,9 +54,9 @@ class _InterviewsViewState extends State<_InterviewsView> {
   Widget build(BuildContext context) {
     final strings = InterviewStrings.of(context);
     return Scaffold(
-      backgroundColor: HomeColors.canvas,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: HomeColors.canvas,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         surfaceTintColor: Colors.transparent,
         leading: Semantics(
           label: MaterialLocalizations.of(context).backButtonTooltip,
@@ -68,8 +68,8 @@ class _InterviewsViewState extends State<_InterviewsView> {
         ),
         title: DefaultText(
           text: strings.title,
-          style: const TextStyle(
-            color: HomeColors.ink,
+          style: TextStyle(
+            color: context.appInk,
             fontSize: 19,
             fontWeight: FontWeight.w900,
           ),
@@ -102,7 +102,6 @@ class _InterviewsViewState extends State<_InterviewsView> {
                   else if (state.error != null && state.items.isEmpty)
                     SliverToBoxAdapter(
                       child: InterviewsErrorState(
-                        message: state.error!,
                         onRetry: () => cubit.load(refresh: true),
                       ),
                     )
@@ -166,12 +165,12 @@ class _InterviewsHeader extends StatelessWidget {
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [Color(0xFF5847CE), Color(0xFF7C68E3)],
+        colors: [Color(0xFF29B148), Color(0xFF0FA348)],
       ),
       borderRadius: BorderRadius.circular(24),
       boxShadow: const [
         BoxShadow(
-          color: Color(0x285947CF),
+          color: Color(0x2818A949),
           blurRadius: 25,
           offset: Offset(0, 12),
         ),

@@ -13,6 +13,16 @@ class ProfileApi {
     return await RemoteApi.put('profile', body: data);
   }
 
+  Future<Response> uploadAvatar(FormData formData) async {
+    return await RemoteApi.post('profile/avatar', body: formData);
+  }
+
+  Future<Response> deleteAvatar() => RemoteApi.delete('profile/avatar');
+
+  Future<Response> previewCurrentCv() => RemoteApi.get('profile/cv/preview');
+
+  Future<Response> downloadCurrentCv() => RemoteApi.get('profile/cv/download');
+
   Future<Response> getExperiences() async {
     return await RemoteApi.get('profile/experiences');
   }

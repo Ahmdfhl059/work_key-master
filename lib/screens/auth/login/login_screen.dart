@@ -4,9 +4,10 @@ import 'package:work_key/layout/layout.dart';
 import 'package:work_key/logic/auth_cubit/auth_cubit.dart';
 import 'package:work_key/logic/auth_cubit/auth_state.dart';
 import 'package:work_key/shared/components/components.dart';
-import 'package:work_key/utils/constants.dart';
+import 'package:work_key/shared/components/app_snackbar.dart';
 import '../forgot_password/forgot_password_screen.dart';
 import '../register/register_screen.dart';
+import '../verification/verification_screen.dart';
 import 'widgets/login_header.dart';
 import '../widgets/guest_access_button.dart';
 
@@ -22,32 +23,47 @@ class LoginScreen extends StatelessWidget {
       listener: (context, state) {
         if (state is AuthSuccessState) {
           print('--- UI Success: User Logged In ---');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: DefaultText(
-                text: state.userModel.message ?? 'Login Successful',
-                style: const TextStyle(color: Colors.white),
+          if (!state.userModel.emailVerified) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => VerificationCodeScreen(
+                  email: emailController.text.trim(),
+                  flow: VerificationFlow.account,
+                  loginPassword: passwordController.text,
+                  sendAccountCodeOnOpen: true,
+                ),
               ),
-              backgroundColor: Colors.green,
-            ),
+            );
+            return;
+          }
+          AppSnackBar.success(
+            context,
+            state.userModel.message ?? 'Login Successful',
+            title: 'Welcome back',
           );
           navigateAndFinish(context, const Layout());
         } else if (state is AuthErrorState) {
           print('--- UI Error: ${state.error} ---');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: DefaultText(
-                text: state.error,
-                style: const TextStyle(color: Colors.white),
+          if (_requiresEmailVerification(state.error)) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => VerificationCodeScreen(
+                  email: emailController.text.trim(),
+                  flow: VerificationFlow.account,
+                  loginPassword: passwordController.text,
+                  sendAccountCodeOnOpen: true,
+                ),
               ),
-              backgroundColor: Colors.red,
-            ),
-          );
+            );
+          } else {
+            AppSnackBar.error(context, state.error, title: 'Login failed');
+          }
         }
       },
       builder: (context, state) {
+        final colors = Theme.of(context).colorScheme;
         return Scaffold(
-          backgroundColor: const Color(0xFFF8F9FD),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: SafeArea(
             child: ResponsiveContent(
               maxWidth: 520,
@@ -80,9 +96,10 @@ class LoginScreen extends StatelessWidget {
                         },
                         text: "Forgot Password?",
                         textStyle: TextStyle(
-                            color: primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13),
+                          color: colors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 25),
@@ -93,10 +110,10 @@ class LoginScreen extends StatelessWidget {
                             onPressed: () {
                               if (emailController.text.trim().isEmpty ||
                                   passwordController.text.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('Please fill all fields'),
-                                      backgroundColor: Colors.orange),
+                                AppSnackBar.warning(
+                                  context,
+                                  'Please fill all fields',
+                                  title: 'Missing information',
                                 );
                               } else {
                                 AuthCubit.get(context).login(
@@ -107,32 +124,41 @@ class LoginScreen extends StatelessWidget {
                             },
                           ),
                     const SizedBox(height: 30),
-                    const Row(
+                    Row(
                       children: [
-                        Expanded(child: Divider()),
+                        const Expanded(child: Divider()),
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 15),
-                          child: DefaultText(text: "OR", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
+                          child: DefaultText(
+                            text: "OR",
+                            style: TextStyle(
+                              color: colors.onSurfaceVariant,
+                              fontSize: 12,
+                            ),
+                          ),
                         ),
-                        Expanded(child: Divider()),
+                        const Expanded(child: Divider()),
                       ],
                     ),
                     const SizedBox(height: 24),
                     const GuestAccessButton(),
                     const SizedBox(height: 24),
-                     Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         DefaultText(
-                            text: "New here? ",
-                            style: TextStyle(color: Colors.grey.shade600)),
+                          text: "New here? ",
+                          style: TextStyle(color: colors.onSurfaceVariant),
+                        ),
                         DefaultTextButton(
                           onPressed: () {
                             navigateTo(context, const RegisterScreen());
                           },
                           text: "Create Account",
                           textStyle: TextStyle(
-                              color: primary, fontWeight: FontWeight.w900),
+                            color: colors.primary,
+                            fontWeight: FontWeight.w900,
+                          ),
                         ),
                       ],
                     ),
@@ -146,4 +172,24 @@ class LoginScreen extends StatelessWidget {
       },
     );
   }
+}
+
+bool _requiresEmailVerification(String message) {
+  final value = message.toLowerCase();
+  return value.contains('email not verified') ||
+      value.contains('email_not_verified') ||
+      value.contains('email is not verified') ||
+      value.contains('email must be verified') ||
+      value.contains('email verification') ||
+      value.contains('verify your email') ||
+      value.contains('verification required') ||
+      value.contains('unverified') ||
+      value.contains('غير متحقق') ||
+      value.contains('غير موثق') ||
+      value.contains('غير مفعّل') ||
+      value.contains('البريد الإلكتروني غير مؤكد') ||
+      value.contains('البريد غير مؤكد') ||
+      value.contains('البريد غير مفعل') ||
+      value.contains('تفعيل البريد') ||
+      value.contains('تحقق من بريدك');
 }

@@ -20,7 +20,8 @@ class HomeErrorState extends HomeStates {
   HomeErrorState(this.message, {this.statusCode, this.errorCode});
 
   bool get isUnauthorized => statusCode == 401;
-  bool get isSuspended => statusCode == 403 &&
+  bool get isSuspended =>
+      statusCode == 403 &&
       (errorCode?.toUpperCase() == 'USER_SUSPENDED' ||
           message.toUpperCase().contains('USER_SUSPENDED'));
   bool get isForbiddenRole => statusCode == 403 && !isSuspended;

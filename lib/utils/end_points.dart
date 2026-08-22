@@ -1,6 +1,4 @@
 class EndPoints {
-
-
   ///AUTH
   static final String signup = '/v1/citizen/register';
   static final String fcm = '/fcm-token';
@@ -15,13 +13,11 @@ class EndPoints {
   static final String showProfile = "/profile";
   static final String updateProfile = "/update-profile";
 
-
   static final String indexAgencies = '/v1/agencies';
   static final String indexNotifications = '/v1/citizen/notifications';
   static final String indexComplaintLog = '/v1/complaints';
   static final String indexCities = '/v1/cities';
   static final String indexStates = '/v1/states';
   static final String indexComplaintType = '/v1/complaint-types/1';
-  static final String registerComplaint=  "/v1/complaints";
-
+  static final String registerComplaint = "/v1/complaints";
 }

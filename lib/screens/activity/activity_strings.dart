@@ -1,19 +1,31 @@
 import 'package:flutter/material.dart';
+import '../../localization/app_localizations.dart';
 
 class ActivityStrings {
-  final bool ar;
-  const ActivityStrings._(this.ar);
-  factory ActivityStrings.of(BuildContext context) => ActivityStrings._(Localizations.localeOf(context).languageCode == 'ar');
-  String get title => ar ? 'نشاطي' : 'Activity';
-  String get all => ar ? 'الكل' : 'All';
-  String get action => ar ? 'يحتاج إجراء' : 'Action needed';
-  String get today => ar ? 'اليوم' : 'Today';
-  String get week => ar ? 'هذا الأسبوع' : 'This week';
-  String get search => ar ? 'ابحث في نشاطك' : 'Search activity';
-  String get schedule => ar ? 'الجدول القادم' : 'Upcoming schedule';
-  String get feed => ar ? 'أنشطة أخرى' : 'Recent activity';
-  String get required => ar ? 'يتطلب إجراء' : 'Requires action';
-  String get markAll => ar ? 'تحديد الكل كمقروء' : 'Mark all as read';
-  String banner(int count) => ar ? 'لديك $count أنشطة تحتاج إجراء' : '$count activities need your attention';
-  String empty(String group, bool searching) => searching ? (ar ? 'لم نجد أنشطة تطابق البحث' : 'No activity matches your search') : ar ? (group == 'requires_action' ? 'لا توجد أنشطة تحتاج إجراء حاليًا' : group == 'today' ? 'لا توجد أنشطة لليوم' : group == 'this_week' ? 'لا توجد أنشطة لهذا الأسبوع' : 'لا توجد أنشطة حتى الآن') : (group == 'requires_action' ? 'No activities need action' : group == 'today' ? 'No activity today' : group == 'this_week' ? 'No activity this week' : 'No activity yet');
+  final BuildContext context;
+  const ActivityStrings._(this.context);
+  factory ActivityStrings.of(BuildContext context) => ActivityStrings._(context);
+  String get title => context.tr('activity.title');
+  String get all => context.tr('activity.all');
+  String get action => context.tr('activity.action_needed');
+  String get today => context.tr('activity.today');
+  String get week => context.tr('activity.this_week');
+  String get search => context.tr('activity.search');
+  String get schedule => context.tr('activity.upcoming_schedule');
+  String get feed => context.tr('activity.recent');
+  String get required => context.tr('activity.requires_action');
+  String get markAll => context.tr('activity.mark_all_read');
+  String banner(int count) =>
+      context.tr('activity.action_banner', values: {'count': count});
+  String empty(String group, bool searching) => context.tr(
+    searching
+        ? 'activity.empty_search'
+        : group == 'requires_action'
+        ? 'activity.empty_action'
+        : group == 'today'
+        ? 'activity.empty_today'
+        : group == 'this_week'
+        ? 'activity.empty_week'
+        : 'activity.empty_all',
+  );
 }

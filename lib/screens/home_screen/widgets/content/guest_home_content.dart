@@ -27,7 +27,7 @@ class GuestHomeContent extends StatelessWidget {
         jobs: home.latestJobs,
         horizontal: true,
         onViewMore: () => navigateTo(context, const ExploreJobsScreen()),
-        emptyMessage: 'No recent jobs right now',
+        emptyMessage: 'home.no_recent_jobs',
       ),
       const SizedBox(height: 32),
       HomeCompaniesSection(companies: home.featuredCompanies),

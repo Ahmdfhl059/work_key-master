@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -8,8 +10,8 @@ import 'package:flutter_radio_group/flutter_radio_group.dart';
 
 import '../../logic/local_cubit/local_cubit.dart';
 import '../../logic/local_cubit/local_state.dart';
+import '../../localization/app_localizations.dart';
 import '../../utils/constants.dart';
-import '../../utils/constants.dart' as AppColors;
 
 class CustomTextFormFiled extends StatefulWidget {
   final TextEditingController controller;
@@ -53,11 +55,23 @@ class CustomTextFormFiled extends StatefulWidget {
 
 class CustomTextFormFiledState extends State<CustomTextFormFiled> {
   bool _obscureText = true;
+  late final FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
     _obscureText = widget.isPassword;
+    _focusNode = FocusNode()..addListener(_onFocusChanged);
+  }
+
+  void _onFocusChanged() => setState(() {});
+
+  @override
+  void dispose() {
+    _focusNode
+      ..removeListener(_onFocusChanged)
+      ..dispose();
+    super.dispose();
   }
 
   void _togglePasswordVisibility() {
@@ -68,46 +82,102 @@ class CustomTextFormFiledState extends State<CustomTextFormFiled> {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      readOnly: widget.readOnly,
-      controller: widget.controller,
-      keyboardType: widget.type,
-      onFieldSubmitted: widget.onSubmit,
-      onChanged: widget.onChange,
-      onTap: widget.onTap,
-      validator: widget.validate,
-      obscureText: _obscureText,
-      cursorColor: widget.borderColor,
-      decoration: InputDecoration(
-        hintText: widget.hintText,
-        suffixIcon: widget.isPassword
-            ? GestureDetector(
-                onTap: _togglePasswordVisibility,
-                child: Icon(
-                  _obscureText
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
+    final colors = Theme.of(context).colorScheme;
+    final radius = (widget.circularSize is num)
+        ? (widget.circularSize as num).toDouble().clamp(14.0, 26.0)
+        : 18.0;
+    final accent = widget.borderColor is Color
+        ? widget.borderColor as Color
+        : colors.primary;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius + 2),
+        boxShadow: _focusNode.hasFocus
+            ? [
+                BoxShadow(
+                  color: accent.withValues(alpha: .18),
+                  blurRadius: 20,
+                  offset: const Offset(0, 7),
                 ),
-              )
-            : null,
-        prefixIcon: Icon(widget.prefix),
-        labelText: widget.label,
-        prefixIconColor: widget.iconColor,
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: widget.borderColor),
-          borderRadius: BorderRadius.all(Radius.circular(widget.circularSize)),
+              ]
+            : const [],
+      ),
+      child: TextFormField(
+        focusNode: _focusNode,
+        readOnly: widget.readOnly,
+        controller: widget.controller,
+        keyboardType: widget.type,
+        onFieldSubmitted: widget.onSubmit,
+        onChanged: widget.onChange,
+        onTap: widget.onTap,
+        validator: widget.validate,
+        obscureText: _obscureText,
+        cursorColor: accent,
+        style: TextStyle(
+          color: colors.onSurface,
+          fontWeight: FontWeight.w600,
+          fontSize: 14.5,
         ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: widget.borderColor),
-          borderRadius: BorderRadius.all(Radius.circular(widget.circularSize)),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.red),
-          borderRadius: BorderRadius.all(Radius.circular(widget.circularSize)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: widget.borderColor),
-          borderRadius: BorderRadius.all(Radius.circular(widget.circularSize)),
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: _focusNode.hasFocus
+              ? colors.primaryContainer.withValues(alpha: .26)
+              : colors.surfaceContainer,
+          hintText: widget.hintText,
+          suffixIcon: widget.isPassword
+              ? IconButton(
+                  onPressed: _togglePasswordVisibility,
+                  icon: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 180),
+                    child: Icon(
+                      _obscureText
+                          ? Icons.visibility_off_rounded
+                          : Icons.visibility_rounded,
+                      key: ValueKey(_obscureText),
+                    ),
+                  ),
+                )
+              : null,
+          prefixIcon: widget.prefix == null
+              ? null
+              : Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 7, end: 4),
+                  child: Container(
+                    width: 42,
+                    height: 42,
+                    margin: const EdgeInsets.symmetric(vertical: 6),
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: .11),
+                      borderRadius: BorderRadius.circular(13),
+                    ),
+                    child: Icon(widget.prefix, color: accent, size: 20),
+                  ),
+                ),
+          prefixIconConstraints: const BoxConstraints(minWidth: 58),
+          labelText: AppLocalizations.of(context).text(widget.label),
+          labelStyle: TextStyle(
+            color: _focusNode.hasFocus ? accent : colors.onSurfaceVariant,
+            fontWeight: FontWeight.w700,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: accent, width: 1.7),
+            borderRadius: BorderRadius.circular(radius),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: colors.error, width: 1.7),
+            borderRadius: BorderRadius.circular(radius),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: colors.error.withValues(alpha: .72)),
+            borderRadius: BorderRadius.circular(radius),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: colors.outlineVariant.withValues(alpha: .82),
+            ),
+            borderRadius: BorderRadius.circular(radius),
+          ),
         ),
       ),
     );
@@ -140,30 +210,199 @@ class DefaultButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final endColor = Color.lerp(background, const Color(0xFF087B3C), .42)!;
     return Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(borderRadius),
-      ),
-      child: MaterialButton(
-        shape: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(borderRadius),
-          borderSide: BorderSide(style: BorderStyle.none),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [background, endColor],
         ),
-        onPressed: onPress,
-        child: Text(
-          uppercase ? text.toUpperCase() : text,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: textColor,
-            fontSize: fontSize,
+        borderRadius: BorderRadius.circular(borderRadius.clamp(14, 24)),
+        border: Border.all(color: Colors.white.withValues(alpha: .14)),
+        boxShadow: [
+          BoxShadow(
+            color: background.withValues(alpha: isDark ? .28 : .34),
+            blurRadius: 22,
+            offset: const Offset(0, 10),
+            spreadRadius: -5,
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(borderRadius.clamp(14, 24)),
+          onTap: onPress,
+          child: Center(
+            child: Text(
+              uppercase
+                  ? AppLocalizations.of(context).text(text).toUpperCase()
+                  : AppLocalizations.of(context).text(text),
+              style: TextStyle(
+                letterSpacing: .2,
+                fontWeight: FontWeight.w800,
+                color: textColor,
+                fontSize: fontSize.clamp(13, 17),
+              ),
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+class ModernRetryButton extends StatefulWidget {
+  final FutureOr<void> Function() onRetry;
+  final String text;
+  final double width;
+
+  const ModernRetryButton({
+    super.key,
+    required this.onRetry,
+    this.text = 'common.retry',
+    this.width = 178,
+  });
+
+  @override
+  State<ModernRetryButton> createState() => _ModernRetryButtonState();
+}
+
+class AnimatedPressableCard extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTap;
+  final BorderRadius borderRadius;
+
+  const AnimatedPressableCard({
+    super.key,
+    required this.child,
+    this.onTap,
+    this.borderRadius = const BorderRadius.all(Radius.circular(24)),
+  });
+
+  @override
+  State<AnimatedPressableCard> createState() => _AnimatedPressableCardState();
+}
+
+class _AnimatedPressableCardState extends State<AnimatedPressableCard> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
+    tween: Tween(begin: 0, end: 1),
+    duration: const Duration(milliseconds: 460),
+    curve: Curves.easeOutCubic,
+    builder: (context, value, child) => Opacity(
+      opacity: value,
+      child: Transform.translate(
+        offset: Offset(0, 18 * (1 - value)),
+        child: child,
+      ),
+    ),
+    child: AnimatedScale(
+      scale: _pressed ? .975 : 1,
+      duration: const Duration(milliseconds: 130),
+      curve: Curves.easeOut,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: widget.onTap,
+          onTapDown: widget.onTap == null
+              ? null
+              : (_) => setState(() => _pressed = true),
+          onTapCancel: widget.onTap == null
+              ? null
+              : () => setState(() => _pressed = false),
+          onTapUp: widget.onTap == null
+              ? null
+              : (_) => setState(() => _pressed = false),
+          borderRadius: widget.borderRadius,
+          child: widget.child,
+        ),
+      ),
+    ),
+  );
+}
+
+class _ModernRetryButtonState extends State<ModernRetryButton> {
+  bool _loading = false;
+
+  Future<void> _retry() async {
+    if (_loading) return;
+    setState(() => _loading = true);
+    final started = DateTime.now();
+    try {
+      await Future.sync(widget.onRetry);
+    } finally {
+      final elapsed = DateTime.now().difference(started);
+      if (elapsed < const Duration(milliseconds: 650)) {
+        await Future<void>.delayed(const Duration(milliseconds: 650) - elapsed);
+      }
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedScale(
+    scale: _loading ? .97 : 1,
+    duration: const Duration(milliseconds: 180),
+    child: SizedBox(
+      width: widget.width,
+      height: 50,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [HomeColors.brand, HomeColors.purple],
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x3529B148),
+              blurRadius: 18,
+              offset: Offset(0, 8),
+            ),
+          ],
+        ),
+        child: FilledButton.icon(
+          onPressed: _loading ? null : _retry,
+          style: FilledButton.styleFrom(
+            disabledBackgroundColor: Colors.transparent,
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          icon: _loading
+              ? const SizedBox.square(
+                  dimension: 19,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.3,
+                    color: Colors.white,
+                  ),
+                )
+              : const Icon(Icons.refresh_rounded, color: Colors.white),
+          label: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 180),
+            child: Text(
+              _loading
+                  ? context.tr('common.refreshing')
+                  : context.tr(widget.text),
+              key: ValueKey(_loading),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 class DefaultText extends StatelessWidget {
@@ -184,12 +423,31 @@ class DefaultText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final originalColor = style?.color;
+    final darkNeutral =
+        originalColor != null &&
+        originalColor.r == originalColor.g &&
+        originalColor.g == originalColor.b &&
+        originalColor.computeLuminance() < .7;
+    final adaptiveColor =
+        theme.brightness == Brightness.dark &&
+            (originalColor == context.appInk ||
+                originalColor == context.appMuted ||
+                originalColor == Colors.black ||
+                originalColor == Colors.black87 ||
+                darkNeutral)
+        ? (originalColor == context.appMuted
+              ? theme.colorScheme.onSurfaceVariant
+              : theme.colorScheme.onSurface)
+        : originalColor;
     return Text(
-      text,
+      AppLocalizations.of(context).text(text),
       overflow: overflow,
       maxLines: maxLines,
       textAlign: textAlign,
-      style: style ?? Theme.of(context).textTheme.bodyMedium,
+      style:
+          style?.copyWith(color: adaptiveColor) ?? theme.textTheme.bodyMedium,
     );
   }
 }
@@ -216,6 +474,27 @@ class DefaultTextButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final style = textStyle is TextStyle ? textStyle as TextStyle : null;
+    final originalColor = style?.color;
+    final darkNeutral =
+        originalColor != null &&
+        originalColor.r == originalColor.g &&
+        originalColor.g == originalColor.b &&
+        originalColor.computeLuminance() < .7;
+    final effectiveStyle =
+        theme.brightness == Brightness.dark &&
+            (originalColor == context.appInk ||
+                originalColor == context.appMuted ||
+                originalColor == Colors.black ||
+                originalColor == Colors.black87 ||
+                darkNeutral)
+        ? style?.copyWith(
+            color: originalColor == context.appMuted
+                ? theme.colorScheme.onSurfaceVariant
+                : theme.colorScheme.onSurface,
+          )
+        : style;
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
@@ -223,10 +502,10 @@ class DefaultTextButton extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       ),
       child: Text(
-        text,
+        AppLocalizations.of(context).text(text),
         overflow: overflow,
         maxLines: maxLines,
-        style: textStyle,
+        style: effectiveStyle,
       ),
     );
   }
@@ -235,9 +514,27 @@ class DefaultTextButton extends StatelessWidget {
 Future navigateTo(BuildContext context, Widget screen) {
   return Navigator.push(
     context,
-    MaterialPageRoute(
-      builder: (context) {
-        return screen;
+    PageRouteBuilder(
+      transitionDuration: const Duration(milliseconds: 420),
+      reverseTransitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (_, animation, secondaryAnimation) => screen,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        if (MediaQuery.disableAnimationsOf(context)) return child;
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+          reverseCurve: Curves.easeInCubic,
+        );
+        return FadeTransition(
+          opacity: curved,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(.035, .025),
+              end: Offset.zero,
+            ).animate(curved),
+            child: child,
+          ),
+        );
       },
     ),
   );
@@ -250,17 +547,18 @@ void navigatePop(BuildContext context, bool isSuccess) {
 void navigateAndFinish(BuildContext context, Widget screen) =>
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(
-        builder: (BuildContext context) {
-          return screen;
-        },
+      PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 420),
+        pageBuilder: (_, animation, secondaryAnimation) => screen,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            FadeTransition(opacity: animation, child: child),
       ),
       (route) => false,
     );
 
 class DefaultIconButton extends StatefulWidget {
   final Function onPressed;
-  final Icon icon;
+  final Widget icon;
   final double size;
   final dynamic color;
 
@@ -449,7 +747,7 @@ class DefContainer extends StatelessWidget {
     this.color,
     this.boxShadow,
     this.width,
-     this.padding,
+    this.padding,
   });
 
   @override
@@ -486,7 +784,11 @@ class ResponsiveContent extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final horizontal = width < 360 ? 14.0 : width < 700 ? 20.0 : 30.0;
+        final horizontal = width < 360
+            ? 14.0
+            : width < 700
+            ? 20.0
+            : 30.0;
         return Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
@@ -509,41 +811,52 @@ class JobCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: HomeColors.divider),
-        ),
-        child: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surfaceContainer,
+      borderRadius: BorderRadius.circular(22),
+      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            Row(children: [
-              SkeletonBox(width: 52, height: 52, radius: 26),
-              SizedBox(width: 13),
-              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                SkeletonBox(width: 210, height: 16),
-                SizedBox(height: 9),
-                SkeletonBox(width: 125, height: 11),
-              ])),
-            ]),
-            SizedBox(height: 17),
-            Wrap(spacing: 7, runSpacing: 7, children: [
-              SkeletonBox(width: 88, height: 27, radius: 9),
-              SkeletonBox(width: 74, height: 27, radius: 9),
-              SkeletonBox(width: 105, height: 27, radius: 9),
-            ]),
-            SizedBox(height: 13),
-            Row(children: [
-              SkeletonBox(width: 62, height: 24, radius: 8),
-              SizedBox(width: 6),
-              SkeletonBox(width: 76, height: 24, radius: 8),
-              Spacer(),
-              SkeletonBox(width: 20, height: 12),
-            ]),
+            const SkeletonBox(width: 52, height: 52, radius: 26),
+            const SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SkeletonBox(width: 210, height: 16),
+                  const SizedBox(height: 9),
+                  const SkeletonBox(width: 125, height: 11),
+                ],
+              ),
+            ),
           ],
         ),
-      );
+        const SizedBox(height: 17),
+        const Wrap(
+          spacing: 7,
+          runSpacing: 7,
+          children: [
+            SkeletonBox(width: 88, height: 27, radius: 9),
+            SkeletonBox(width: 74, height: 27, radius: 9),
+            SkeletonBox(width: 105, height: 27, radius: 9),
+          ],
+        ),
+        const SizedBox(height: 13),
+        Row(
+          children: [
+            const SkeletonBox(width: 90, height: 11),
+            const Spacer(),
+            const SkeletonBox(width: 80, height: 13),
+          ],
+        ),
+      ],
+    ),
+  );
 }
 
 class SkeletonBox extends StatelessWidget {
@@ -551,17 +864,22 @@ class SkeletonBox extends StatelessWidget {
   final double height;
   final double radius;
 
-  const SkeletonBox({super.key, required this.width, required this.height, this.radius = 6});
+  const SkeletonBox({
+    super.key,
+    required this.width,
+    required this.height,
+    this.radius = 6,
+  });
 
   @override
   Widget build(BuildContext context) => Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: const Color(0xFFE9EDF4),
-          borderRadius: BorderRadius.circular(radius),
-        ),
-      );
+    width: width,
+    height: height,
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(radius),
+    ),
+  );
 }
 
 String? local;
@@ -578,8 +896,8 @@ class Local extends StatelessWidget {
             padding: const EdgeInsets.all(10),
             child: DropdownButton<String>(
               style: Theme.of(context).textTheme.labelMedium,
-              dropdownColor: Colors.white,
-              iconEnabledColor: primary,
+              dropdownColor: Theme.of(context).colorScheme.surfaceContainer,
+              iconEnabledColor: Theme.of(context).colorScheme.primary,
               borderRadius: BorderRadius.circular(15),
               underline: Center(),
               value: state.locale.languageCode,
@@ -620,12 +938,14 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return SizedBox(
       width: double.infinity,
       height: 55,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: colors.primary,
+          foregroundColor: colors.onPrimary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
@@ -633,7 +953,7 @@ class CustomButton extends StatelessWidget {
         onPressed: onPressed,
         child: Text(
           text,
-          style: const TextStyle(fontSize: 16, color: Colors.white),
+          style: TextStyle(fontSize: 16, color: colors.onPrimary),
         ),
       ),
     );
@@ -645,6 +965,7 @@ class CustomTextField extends StatefulWidget {
   final String label;
   final IconData icon;
   final bool isPassword;
+  final dynamic keyboardType;
   final TextEditingController? controller;
 
   const CustomTextField({
@@ -654,6 +975,7 @@ class CustomTextField extends StatefulWidget {
     required this.icon,
     this.isPassword = false,
     this.controller,
+    this.keyboardType,
   });
 
   @override
@@ -665,25 +987,39 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.label, style: const TextStyle(fontSize: 14)),
+        Text(
+          widget.label,
+          style: TextStyle(
+            color: colors.onSurface,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
 
         const SizedBox(height: 8),
 
         TextField(
+          keyboardType: widget.keyboardType,
           controller: widget.controller,
           obscureText: widget.isPassword ? obscure : false,
+          cursorColor: colors.primary,
+          style: TextStyle(color: colors.onSurface),
           decoration: InputDecoration(
             hintText: widget.hint,
-            hintStyle: const TextStyle(color: Colors.black38),
-            prefixIcon: Icon(widget.icon, color: AppColors.primary),
+
+            hintStyle: TextStyle(
+              color: colors.onSurfaceVariant.withValues(alpha: .72),
+            ),
+            prefixIcon: Icon(widget.icon, color: colors.primary),
             suffixIcon: widget.isPassword
                 ? IconButton(
                     icon: Icon(
                       obscure ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.black45,
+                      color: colors.onSurfaceVariant,
                     ),
                     onPressed: () {
                       setState(() {
@@ -698,11 +1034,11 @@ class _CustomTextFieldState extends State<CustomTextField> {
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: AppColors.border, width: 1.5),
+              borderSide: BorderSide(color: colors.outlineVariant, width: 1.5),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+              borderSide: BorderSide(color: colors.primary, width: 1.5),
             ),
           ),
         ),

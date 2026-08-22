@@ -1,11 +1,11 @@
 {
-    "name": "work_key",
-    "short_name": "work_key",
+    "name": "Work Key",
+    "short_name": "Work Key",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F7F9F8",
+    "theme_color": "#18A949",
+    "description": "Work Key — smarter opportunities and stronger careers.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

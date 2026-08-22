@@ -3,15 +3,25 @@ import '../../utils/dio_methods.dart';
 
 class JobsApi {
   Future<Response> getJobs({Map<String, dynamic>? query}) async {
-    return await RemoteApi.get('jobs', queryParameters: query);
+    final parameters = Map<String, dynamic>.from(query ?? const {});
+    final companyId = parameters.remove('company_id');
+    return await RemoteApi.get(
+      companyId == null ? 'jobs' : 'companies/$companyId/jobs',
+      queryParameters: parameters,
+    );
   }
 
   Future<Response> getJobDetails(int id) async {
-    return await RemoteApi.get('jobs/$id');
+    // Keep the HTTP status available to the repository so a removed job can
+    // be shown as an empty state while connection failures remain retryable.
+    return await RemoteApi.get('jobs/$id', preserveDioError: true);
   }
 
   Future<Response> getRecommendedJobs({int limit = 20}) async {
-    return await RemoteApi.get('jobs/recommended', queryParameters: {'limit': limit});
+    return await RemoteApi.get(
+      'jobs/recommended',
+      queryParameters: {'limit': limit},
+    );
   }
 
   Future<Response> getFilterSchema({required String language}) async {

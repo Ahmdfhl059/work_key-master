@@ -10,22 +10,33 @@ class ApplicationCubit extends Cubit<ApplicationStates> {
 
   void getMyApplications() {
     emit(ApplicationLoadingState());
-    applicationRepo.getMyApplications().then((list) {
-      emit(GetApplicationsSuccessState(list));
-    }).catchError((error) {
-      emit(ApplicationErrorState(error.toString()));
-    });
+    applicationRepo
+        .getMyApplications()
+        .then((list) {
+          emit(GetApplicationsSuccessState(list));
+        })
+        .catchError((error) {
+          emit(ApplicationErrorState(error.toString()));
+        });
   }
 
-  void applyForJob(int jobId, Map<String, dynamic> data) {
+  Future<void> applyForJob(int jobId, Map<String, dynamic> data) async {
     emit(ApplicationLoadingState());
-    applicationRepo.applyForJob(jobId, data).then((app) {
+    try {
+      final app = await applicationRepo.applyForJob(jobId, data);
       if (app.id != -1) {
-        emit(ApplicationActionSuccessState(app.message ?? 'Applied Successfully'));
+        emit(
+          ApplicationActionSuccessState(
+            app.message ?? 'Applied Successfully',
+            app.id,
+          ),
+        );
       } else {
         emit(ApplicationErrorState(app.message ?? 'Error'));
       }
-    });
+    } catch (error) {
+      emit(ApplicationErrorState(error.toString()));
+    }
   }
 
   void getApplicationDetails(int id) {

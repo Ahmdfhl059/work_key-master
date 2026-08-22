@@ -10,6 +10,10 @@ abstract final class ApplicationNavigation {
       'confirm_interview' || 'view_interview' => 'interview',
       _ => '',
     };
-    HomeNavigation.openTarget(context, target, id: action.resourceId?.toString());
+    HomeNavigation.openTarget(
+      context,
+      target,
+      id: action.resourceId?.toString(),
+    );
   }
 }

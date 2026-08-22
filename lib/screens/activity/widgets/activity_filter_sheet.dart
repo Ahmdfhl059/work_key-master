@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:work_key/logic/activity_cubit/activity_cubit.dart';
 import 'package:work_key/logic/activity_cubit/activity_state.dart';
+import 'package:work_key/localization/app_localizations.dart';
 import 'package:work_key/shared/components/components.dart';
 import 'package:work_key/utils/constants.dart';
 
@@ -53,7 +54,7 @@ class _SheetState extends State<_Sheet> {
 
   @override
   Widget build(BuildContext context) => Material(
-    color: Colors.white,
+    color: Theme.of(context).colorScheme.surface,
     borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
     child: SafeArea(
       child: Padding(
@@ -69,11 +70,11 @@ class _SheetState extends State<_Sheet> {
             children: [
               Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: DefaultText(
                       text: 'Filter activity',
                       style: TextStyle(
-                        color: HomeColors.ink,
+                        color: context.appInk,
                         fontSize: 20,
                         fontWeight: FontWeight.w900,
                       ),
@@ -86,10 +87,10 @@ class _SheetState extends State<_Sheet> {
                 ],
               ),
               const SizedBox(height: 16),
-              const DefaultText(
+              DefaultText(
                 text: 'Activity type',
                 style: TextStyle(
-                  color: HomeColors.ink,
+                  color: context.appInk,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -100,7 +101,7 @@ class _SheetState extends State<_Sheet> {
                 children: options.entries
                     .map(
                       (entry) => FilterChip(
-                        label: Text(entry.value),
+                        label: Text(context.tr(entry.value)),
                         selected: types.contains(entry.key),
                         onSelected: (selected) => setState(
                           () => selected
@@ -112,10 +113,10 @@ class _SheetState extends State<_Sheet> {
                     .toList(),
               ),
               const SizedBox(height: 18),
-              const DefaultText(
+              DefaultText(
                 text: 'Date range',
                 style: TextStyle(
-                  color: HomeColors.ink,
+                  color: context.appInk,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -128,7 +129,7 @@ class _SheetState extends State<_Sheet> {
                       icon: const Icon(Icons.calendar_today_outlined, size: 16),
                       label: Text(
                         from == null
-                            ? 'From'
+                            ? context.tr('common.from')
                             : '${from!.year}-${from!.month}-${from!.day}',
                       ),
                     ),
@@ -140,7 +141,7 @@ class _SheetState extends State<_Sheet> {
                       icon: const Icon(Icons.event_outlined, size: 16),
                       label: Text(
                         to == null
-                            ? 'To'
+                            ? context.tr('common.to')
                             : '${to!.year}-${to!.month}-${to!.day}',
                       ),
                     ),
@@ -150,22 +151,36 @@ class _SheetState extends State<_Sheet> {
               const SizedBox(height: 18),
               DropdownButtonFormField<String>(
                 value: sort,
-                decoration: const InputDecoration(labelText: 'Sort by'),
-                items: const [
-                  DropdownMenuItem(value: 'priority', child: Text('Priority')),
-                  DropdownMenuItem(value: 'occurred_at', child: Text('Newest')),
+                decoration: InputDecoration(
+                  labelText: context.tr('common.sort_by'),
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: 'priority',
+                    child: Text(context.tr('common.priority')),
+                  ),
+                  DropdownMenuItem(
+                    value: 'occurred_at',
+                    child: Text(context.tr('common.newest')),
+                  ),
                   DropdownMenuItem(
                     value: 'due_at',
-                    child: Text('Nearest deadline'),
+                    child: Text(context.tr('common.nearest_deadline')),
                   ),
                 ],
                 onChanged: (v) => setState(() => sort = v ?? sort),
               ),
               const SizedBox(height: 10),
               SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(value: 'desc', label: Text('Descending')),
-                  ButtonSegment(value: 'asc', label: Text('Ascending')),
+                segments: [
+                  ButtonSegment(
+                    value: 'desc',
+                    label: Text(context.tr('common.descending')),
+                  ),
+                  ButtonSegment(
+                    value: 'asc',
+                    label: Text(context.tr('common.ascending')),
+                  ),
                 ],
                 selected: {direction},
                 onSelectionChanged: (value) =>
@@ -185,7 +200,7 @@ class _SheetState extends State<_Sheet> {
                         );
                         Navigator.pop(context);
                       },
-                      child: const Text('Reset'),
+                      child: Text(context.tr('common.reset')),
                     ),
                   ),
                   const SizedBox(width: 10),

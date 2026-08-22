@@ -20,13 +20,19 @@ import 'package:work_key/logic/local_cubit/local_state.dart';
 import 'package:work_key/logic/notifications_cubit/notifications_cubit.dart';
 import 'package:work_key/logic/profile_cubit/profile_cubit.dart';
 import 'package:work_key/logic/tests_cubit/tests_cubit.dart';
+import 'package:work_key/logic/theme_cubit/theme_cubit.dart';
+import 'package:work_key/logic/theme_cubit/theme_state.dart';
+import 'package:work_key/localization/app_localizations.dart';
+import 'package:work_key/shared/theme/app_theme.dart';
 import 'package:work_key/screens/auth/SplashScreen.dart';
 import 'package:work_key/utils/shared%20preferences.dart';
 import 'package:work_key/data/repo/home_repo.dart';
+import 'package:work_key/services/push_notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await CacheHelper.init();
+  await PushNotificationService.instance.initialize();
   runApp(const MyApp());
 }
 
@@ -49,33 +55,31 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => CvCubit(CvRepo())),
         BlocProvider(create: (context) => HomeCubit(HomeRepo())),
         BlocProvider(create: (context) => LocaleCubit()..getSavedLanguage()),
+        BlocProvider(create: (context) => ThemeCubit()),
       ],
       child: BlocBuilder<LocaleCubit, LocaleState>(
-        builder: (context, state) {
-          final locale = state is ChangeLocaleState
-              ? state.locale
-              : const Locale('en');
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              useMaterial3: true,
-              pageTransitionsTheme: const PageTransitionsTheme(
-                builders: {
-                  TargetPlatform.android: ZoomPageTransitionsBuilder(),
-                  TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-                },
-              ),
-            ),
-            locale: locale,
-            supportedLocales: const [Locale('en'), Locale('ar')],
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            home: const SplashScreen(),
-          );
-        },
+        builder: (context, localeState) => BlocBuilder<ThemeCubit, ThemeState>(
+          builder: (context, themeState) {
+            final locale = localeState is ChangeLocaleState
+                ? localeState.locale
+                : const Locale('en');
+            return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: AppThemeData.light(),
+              darkTheme: AppThemeData.dark(),
+              themeMode: themeState.mode,
+              locale: locale,
+              supportedLocales: const [Locale('en'), Locale('ar')],
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              home: const SplashScreen(),
+            );
+          },
+        ),
       ),
     );
   }

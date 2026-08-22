@@ -7,28 +7,44 @@ final ipAddress = "https://workey.onrender.com/api/v1";
 final baseURL = ipAddress;
 final ip = ipAddress;
 
-final defaultColor = ('#2BB7C3');
+final defaultColor = ('#18A949');
 
-final Color primary = HexColor('#FF1B4FBF');
-final Color secondary = HexColor('#2A2A2A');
-final Color background = HexColor('0xFFF8F9FD');
-final Color border = HexColor('#585858');
+final Color primary = HexColor('#18A949');
+final Color secondary = HexColor('#1B2831');
+final Color background = HexColor('#F7F9F8');
+final Color border = HexColor('#E1E6E3');
 
 /// Shared Workey home palette. Keeping it here prevents section widgets from
 /// inventing their own colors and makes future branding changes predictable.
 abstract final class HomeColors {
-  static const Color ink = Color(0xFF15213A);
-  static const Color muted = Color(0xFF66738A);
-  static const Color canvas = Color(0xFFF4F7FC);
-  static const Color surface = Colors.white;
-  static const Color brand = Color(0xFF2457C5);
-  static const Color brandDark = Color(0xFF163A8A);
-  static const Color accent = Color(0xFF16A58F);
-  static const Color purple = Color(0xFF6554D9);
-  static const Color softPurple = Color(0xFFF0EEFF);
-  static const Color softBlue = Color(0xFFEAF1FF);
-  static const Color divider = Color(0xFFE5EAF2);
+  static const Color ink = Color(0xFF1B2831);
+  static const Color muted = Color(0xFF63716A);
+  static const Color canvas = Color(0xFFF7F9F8);
+  static const Color surface = Color(0xFFFDFDFD);
+  static const Color brand = Color(0xFF18A949);
+  static const Color brandDark = Color(0xFF0B7B35);
+  static const Color accent = Color(0xFF29B148);
+  // Legacy semantic aliases retained so every existing screen picks up the
+  // approved identity without retaining the old blue/purple palette.
+  static const Color purple = Color(0xFF0FA348);
+  static const Color softPurple = Color(0xFFE8F7ED);
+  static const Color softBlue = Color(0xFFEAF6ED);
+  static const Color divider = Color(0xFFE1E6E3);
   static const Color warning = Color(0xFFF59E36);
+}
+
+/// Theme-aware semantic colors for ordinary application surfaces.
+///
+/// Brand colors remain in [HomeColors], while text, borders and surfaces use
+/// the active [ColorScheme] so light widgets never leak into dark mode.
+extension WorkeyThemeColors on BuildContext {
+  Color get appInk => Theme.of(this).colorScheme.onSurface;
+  Color get appMuted => Theme.of(this).colorScheme.onSurfaceVariant;
+  Color get appDivider => Theme.of(this).colorScheme.outlineVariant;
+  Color get appCanvas => Theme.of(this).scaffoldBackgroundColor;
+  Color get appSurface => Theme.of(this).colorScheme.surfaceContainer;
+  Color get appSoftBrand =>
+      Theme.of(this).colorScheme.primaryContainer.withValues(alpha: .62);
 }
 
 class FilterConstants {

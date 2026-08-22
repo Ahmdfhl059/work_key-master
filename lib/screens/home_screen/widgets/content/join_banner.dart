@@ -11,9 +11,7 @@ class HomeJoinBanner extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(20),
     decoration: BoxDecoration(
-      gradient: const LinearGradient(
-        colors: [HomeColors.ink, Color(0xFF263754)],
-      ),
+      gradient: LinearGradient(colors: [context.appInk, Color(0xFF263754)]),
       borderRadius: BorderRadius.circular(24),
     ),
     child: LayoutBuilder(

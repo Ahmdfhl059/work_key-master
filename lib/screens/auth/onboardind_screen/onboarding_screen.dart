@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:work_key/screens/auth/auth_navigation.dart';
 import 'package:work_key/shared/components/components.dart';
-import 'package:work_key/utils/constants.dart';
 import 'package:work_key/utils/shared%20preferences.dart';
 
 class OnboardingModel {
@@ -10,7 +9,11 @@ class OnboardingModel {
   final String title;
   final String body;
 
-  OnboardingModel({required this.image, required this.title, required this.body});
+  OnboardingModel({
+    required this.image,
+    required this.title,
+    required this.body,
+  });
 }
 
 class OnboardingScreen extends StatefulWidget {
@@ -33,12 +36,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     OnboardingModel(
       image: 'assets/images/2.png',
       title: 'Easy Application',
-      body: 'Apply to your favorite jobs with just one click using your digital CV.',
+      body:
+          'Apply to your favorite jobs with just one click using your digital CV.',
     ),
     OnboardingModel(
       image: 'assets/images/3.png',
       title: 'Track Your Progress',
-      body: 'Stay updated with your application status and interview schedules.',
+      body:
+          'Stay updated with your application status and interview schedules.',
     ),
   ];
 
@@ -56,8 +61,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FD),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -68,7 +74,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               submit();
             },
             text: "SKIP",
-            textStyle: TextStyle(color: primary, fontWeight: FontWeight.w900, fontSize: 16),
+            textStyle: TextStyle(
+              color: colors.primary,
+              fontWeight: FontWeight.w900,
+              fontSize: 16,
+            ),
           ),
           const SizedBox(width: 15),
         ],
@@ -89,7 +99,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     setState(() => isLast = false);
                   }
                 },
-                itemBuilder: (context, index) => _buildBoardingItem(boarding[index]),
+                itemBuilder: (context, index) =>
+                    _buildBoardingItem(boarding[index]),
                 itemCount: boarding.length,
               ),
             ),
@@ -100,8 +111,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   controller: boardController,
                   count: boarding.length,
                   effect: ExpandingDotsEffect(
-                    dotColor: Colors.grey.shade300,
-                    activeDotColor: primary,
+                    dotColor: colors.outlineVariant,
+                    activeDotColor: colors.primary,
                     dotHeight: 8,
                     expansionFactor: 4,
                     dotWidth: 8,
@@ -122,10 +133,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       );
                     }
                   },
-                  backgroundColor: primary,
+                  backgroundColor: colors.primary,
                   elevation: 10,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                  child: const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Icon(
+                    Icons.arrow_forward_ios,
+                    color: colors.onPrimary,
+                    size: 20,
+                  ),
                 ),
               ],
             ),
@@ -136,23 +153,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildBoardingItem(OnboardingModel model) {
+    final colors = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          child: Center(
-            child: Image.asset(model.image, fit: BoxFit.contain),
-          ),
+          child: Center(child: Image.asset(model.image, fit: BoxFit.contain)),
         ),
         const SizedBox(height: 30),
         DefaultText(
           text: model.title,
-          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+          style: const TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.5,
+          ),
         ),
         const SizedBox(height: 15),
         DefaultText(
           text: model.body,
-          style: TextStyle(fontSize: 16, color: Colors.grey.shade600, height: 1.5),
+          style: TextStyle(
+            fontSize: 16,
+            color: colors.onSurfaceVariant,
+            height: 1.5,
+          ),
         ),
         const SizedBox(height: 40),
       ],

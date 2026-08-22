@@ -149,8 +149,12 @@ class InterviewModel {
 
   bool get isOnline => mode.key == 'online';
 
-  bool get canOpenMeeting =>
+  bool get canJoinEmbeddedVideo => isOnline && status.key != 'cancelled';
+
+  bool get canOpenExternalMeeting =>
       isOnline && meetingLink != null && status.key != 'cancelled';
+
+  bool get canOpenMeeting => canJoinEmbeddedVideo;
 
   String get jobTitle {
     final value = jobApplication?.job.title.trim() ?? '';

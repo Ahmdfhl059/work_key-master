@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:work_key/localization/app_localizations.dart';
 import 'package:work_key/shared/components/components.dart';
 import 'package:work_key/utils/constants.dart';
 
@@ -23,26 +24,26 @@ class ExploreEmptyState extends StatelessWidget {
   const ExploreEmptyState({super.key});
 
   @override
-  Widget build(BuildContext context) => const ResponsiveContent(
+  Widget build(BuildContext context) => ResponsiveContent(
     maxWidth: 520,
     child: Padding(
       padding: EdgeInsets.symmetric(vertical: 80),
       child: Column(
         children: [
-          Icon(Icons.work_off_outlined, size: 62, color: HomeColors.muted),
+          Icon(Icons.work_off_outlined, size: 62, color: context.appMuted),
           SizedBox(height: 16),
           DefaultText(
-            text: 'No jobs found',
+            text: 'explore.empty_title',
             style: TextStyle(
-              color: HomeColors.ink,
+              color: context.appInk,
               fontSize: 20,
               fontWeight: FontWeight.w800,
             ),
           ),
           SizedBox(height: 7),
           DefaultText(
-            text: 'Try changing your search or filters.',
-            style: TextStyle(color: HomeColors.muted),
+            text: 'explore.empty_body',
+            style: TextStyle(color: context.appMuted),
           ),
         ],
       ),
@@ -51,14 +52,9 @@ class ExploreEmptyState extends StatelessWidget {
 }
 
 class ExploreErrorState extends StatelessWidget {
-  final String message;
   final VoidCallback onRetry;
 
-  const ExploreErrorState({
-    super.key,
-    required this.message,
-    required this.onRetry,
-  });
+  const ExploreErrorState({super.key, required this.onRetry});
 
   @override
   Widget build(BuildContext context) => ResponsiveContent(
@@ -74,18 +70,21 @@ class ExploreErrorState extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           DefaultText(
-            text: message,
-            style: const TextStyle(color: HomeColors.muted),
+            text: 'explore.load_error_title',
+            style: TextStyle(
+              color: context.appInk,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 7),
+          Text(
+            context.tr('explore.load_error_body'),
+            textAlign: TextAlign.center,
+            style: TextStyle(color: context.appMuted, height: 1.45),
           ),
           const SizedBox(height: 18),
-          DefaultButton(
-            background: HomeColors.purple,
-            text: 'Try again',
-            uppercase: false,
-            borderRadius: 14,
-            fontSize: 14,
-            onPress: onRetry,
-          ),
+          ModernRetryButton(onRetry: onRetry),
         ],
       ),
     ),

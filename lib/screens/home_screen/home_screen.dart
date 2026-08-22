@@ -21,10 +21,8 @@ class GuestHomePage extends StatelessWidget {
   const GuestHomePage({super.key});
 
   @override
-  Widget build(BuildContext context) => const Scaffold(
-        backgroundColor: HomeColors.canvas,
-        body: SafeArea(child: HomeScreen()),
-      );
+  Widget build(BuildContext context) =>
+      const Scaffold(body: SafeArea(child: HomeScreen()));
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -39,12 +37,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: HomeColors.canvas,
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: BlocConsumer<HomeCubit, HomeStates>(
         listener: (context, state) async {
           if (state is HomeErrorState && state.isUnauthorized) {
             await CacheHelper.removeData(key: 'token');
-            if (context.mounted) navigateAndFinish(context, const LoginScreen());
+            if (context.mounted)
+              navigateAndFinish(context, const LoginScreen());
           }
         },
         builder: (context, state) {
@@ -55,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
             if (state.isSuspended) return const HomeAccessView.suspended();
             if (state.isForbiddenRole) return const HomeAccessView.wrongRole();
             if (state.isUnauthorized) return const SizedBox.shrink();
-            return HomeErrorView(message: state.message, onRetry: _refresh);
+            return HomeErrorView(onRetry: _refresh);
           }
 
           final home = (state as HomeSuccessState).homeResponse;
@@ -64,7 +63,9 @@ class _HomeScreenState extends State<HomeScreen> {
             onRefresh: _refresh,
             child: LayoutBuilder(
               builder: (context, constraints) => CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
                 slivers: [
                   SliverToBoxAdapter(
                     child: ResponsiveContent(

@@ -32,6 +32,15 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+.gradle-sandbox/
+.tool-appdata/
+.codex_tmp/
+.build_tools/
+.flutter-root/
+.flutter-build-root/
+.android-sandbox/
+.tool-home/
+.android-ndk/
 
 # Symbolication related
 app.*.symbols

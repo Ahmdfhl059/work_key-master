@@ -12,6 +12,8 @@ import 'package:work_key/screens/activity/widgets/activity_states.dart';
 import 'package:work_key/shared/components/components.dart';
 import 'package:work_key/utils/constants.dart';
 
+import '../../localization/app_localizations.dart';
+
 class ActivityScreen extends StatelessWidget {
   const ActivityScreen({super.key});
 
@@ -59,7 +61,7 @@ class _ActivityViewState extends State<_ActivityView> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: HomeColors.canvas,
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: BlocBuilder<ActivityCubit, ActivityState>(
         builder: (context, state) {
           final cubit = context.read<ActivityCubit>();
@@ -119,10 +121,7 @@ class _ActivityViewState extends State<_ActivityView> {
       return [
         SliverToBoxAdapter(
           child: ResponsiveContent(
-            child: ActivityErrorState(
-              message: state.error!,
-              retry: () => cubit.load(refresh: true),
-            ),
+            child: ActivityErrorState(retry: () => cubit.load(refresh: true)),
           ),
         ),
       ];
@@ -152,8 +151,8 @@ class _ActivityViewState extends State<_ActivityView> {
               padding: const EdgeInsets.only(bottom: 12),
               child: DefaultText(
                 text: strings.feed,
-                style: const TextStyle(
-                  color: HomeColors.ink,
+                style: TextStyle(
+                  color: context.appInk,
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
                 ),
@@ -165,10 +164,7 @@ class _ActivityViewState extends State<_ActivityView> {
         SliverToBoxAdapter(
           child: ResponsiveContent(
             child: ActivityEmptyState(
-              message: strings.empty(
-                state.group,
-                state.search.isNotEmpty,
-              ),
+              message: strings.empty(state.group, state.search.isNotEmpty),
             ),
           ),
         )
@@ -212,8 +208,8 @@ class _ActivityViewState extends State<_ActivityView> {
             padding: const EdgeInsets.only(bottom: 11),
             child: DefaultText(
               text: title,
-              style: const TextStyle(
-                color: HomeColors.ink,
+              style: TextStyle(
+                color: context.appInk,
                 fontSize: 18,
                 fontWeight: FontWeight.w900,
               ),
@@ -280,8 +276,8 @@ class _ActivityHeader extends StatelessWidget {
               Expanded(
                 child: DefaultText(
                   text: strings.title,
-                  style: const TextStyle(
-                    color: HomeColors.ink,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 27,
                     fontWeight: FontWeight.w900,
                   ),
@@ -336,12 +332,12 @@ class _ActivityHeader extends StatelessWidget {
                           icon: const Icon(Icons.close_rounded),
                         ),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainer,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(
-                            color: HomeColors.divider,
-                          ),
+                          borderSide: BorderSide(color: context.appDivider),
                         ),
                       ),
                     ),
@@ -385,6 +381,7 @@ class _ActivityTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     final tabs = [
       ('all', strings.all),
       ('requires_action', strings.action),
@@ -400,15 +397,16 @@ class _ActivityTabs extends StatelessWidget {
             padding: const EdgeInsetsDirectional.only(end: 7),
             child: ChoiceChip(
               selected: selected,
-              selectedColor: HomeColors.softPurple,
+              backgroundColor: colors.surfaceContainer,
+              selectedColor: colors.primaryContainer,
               side: BorderSide(
-                color: selected ? HomeColors.purple : HomeColors.divider,
+                color: selected ? colors.primary : colors.outlineVariant,
               ),
               onSelected: (_) => onSelect(tab.$1),
               label: Text(
                 '${tab.$2} ${state.summary.forGroup(tab.$1)}',
                 style: TextStyle(
-                  color: selected ? HomeColors.purple : HomeColors.muted,
+                  color: selected ? colors.primary : colors.onSurfaceVariant,
                   fontSize: 11.5,
                   fontWeight: FontWeight.w700,
                 ),
@@ -435,7 +433,7 @@ class _ActionBanner extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFF2DA),
+          color: Theme.of(context).colorScheme.tertiaryContainer,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -445,8 +443,8 @@ class _ActionBanner extends StatelessWidget {
             Expanded(
               child: DefaultText(
                 text: title,
-                style: const TextStyle(
-                  color: HomeColors.ink,
+                style: TextStyle(
+                  color: context.appInk,
                   fontSize: 12.5,
                   fontWeight: FontWeight.w800,
                 ),
@@ -467,6 +465,7 @@ class _ActivitySummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     final items = [
       ('Today', summary.today, Icons.today_rounded),
       ('Tests', summary.tests, Icons.quiz_outlined),
@@ -481,18 +480,18 @@ class _ActivitySummary extends StatelessWidget {
             margin: const EdgeInsetsDirectional.only(end: 8),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.surfaceContainer,
               borderRadius: BorderRadius.circular(13),
-              border: Border.all(color: HomeColors.divider),
+              border: Border.all(color: colors.outlineVariant),
             ),
             child: Row(
               children: [
                 Icon(item.$3, size: 16, color: HomeColors.purple),
                 const SizedBox(width: 6),
                 Text(
-                  '${item.$1} ${item.$2}',
-                  style: const TextStyle(
-                    color: HomeColors.ink,
+                  '${context.tr(item.$1)} ${item.$2}',
+                  style: TextStyle(
+                    color: colors.onSurface,
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                   ),
@@ -526,8 +525,8 @@ class _ScheduleSection extends StatelessWidget {
         children: [
           DefaultText(
             text: title,
-            style: const TextStyle(
-              color: HomeColors.ink,
+            style: TextStyle(
+              color: context.appInk,
               fontSize: 18,
               fontWeight: FontWeight.w900,
             ),

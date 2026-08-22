@@ -4,6 +4,8 @@ import 'package:work_key/data/models/job_model.dart';
 import 'package:work_key/shared/components/components.dart';
 import 'package:work_key/utils/constants.dart';
 import 'package:work_key/screens/jobs/job_details_screen.dart';
+import 'package:work_key/shared/components/company_logo.dart';
+import 'package:work_key/localization/app_localizations.dart';
 
 class ExploreJobCard extends StatelessWidget {
   final JobModel job;
@@ -11,21 +13,28 @@ class ExploreJobCard extends StatelessWidget {
   const ExploreJobCard({super.key, required this.job, required this.showMatch});
 
   @override
-  Widget build(BuildContext context) => InkWell(
+  Widget build(BuildContext context) => AnimatedPressableCard(
     onTap: () =>
         navigateTo(context, JobDetailsScreen(jobId: job.id, initialJob: job)),
-    borderRadius: BorderRadius.circular(22),
+    borderRadius: BorderRadius.circular(26),
     child: Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: HomeColors.divider),
+        gradient: LinearGradient(
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
+          colors: [
+            Theme.of(context).colorScheme.surfaceContainerHighest,
+            Theme.of(context).colorScheme.surfaceContainer,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(color: HomeColors.brand.withValues(alpha: .22)),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x0915213A),
-            blurRadius: 18,
-            offset: Offset(0, 8),
+            color: Color(0x1F18A949),
+            blurRadius: 26,
+            offset: Offset(0, 12),
           ),
         ],
       ),
@@ -35,16 +44,10 @@ class ExploreJobCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                radius: 26,
-                backgroundColor: HomeColors.softPurple,
-                foregroundImage: job.company.logo.isNotEmpty
-                    ? NetworkImage(job.company.logo)
-                    : null,
-                child: const Icon(
-                  Icons.business_rounded,
-                  color: HomeColors.purple,
-                ),
+              CompanyLogo(
+                size: 52,
+                url: job.company.logo,
+                companyName: job.company.name,
               ),
               const SizedBox(width: 13),
               Expanded(
@@ -53,8 +56,8 @@ class ExploreJobCard extends StatelessWidget {
                   children: [
                     DefaultText(
                       text: job.title,
-                      style: const TextStyle(
-                        color: HomeColors.ink,
+                      style: TextStyle(
+                        color: context.appInk,
                         fontSize: 17,
                         height: 1.3,
                         fontWeight: FontWeight.w800,
@@ -65,10 +68,7 @@ class ExploreJobCard extends StatelessWidget {
                       text: job.company.name.isEmpty
                           ? 'Company'
                           : job.company.name,
-                      style: const TextStyle(
-                        color: HomeColors.muted,
-                        fontSize: 12.5,
-                      ),
+                      style: TextStyle(color: context.appMuted, fontSize: 12.5),
                     ),
                   ],
                 ),
@@ -80,11 +80,11 @@ class ExploreJobCard extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: HomeColors.softPurple,
+                    color: context.appSoftBrand,
                     borderRadius: BorderRadius.circular(18),
                   ),
                   child: DefaultText(
-                    text: '${job.matchScore}%',
+                    text: '${_scoreLabel(job.matchScore!)}%',
                     style: const TextStyle(
                       color: HomeColors.purple,
                       fontSize: 11,
@@ -94,6 +94,27 @@ class ExploreJobCard extends StatelessWidget {
                 ),
             ],
           ),
+          if (job.hasApplied || job.isExpired || job.isNew) ...[
+            const SizedBox(height: 10),
+            _StateBadge(
+              icon: job.hasApplied
+                  ? Icons.check_circle_rounded
+                  : job.isExpired
+                  ? Icons.event_busy_rounded
+                  : Icons.fiber_new_rounded,
+              text: job.hasApplied
+                  ? (job.viewerApplicationStatus.isEmpty
+                        ? context.tr('jobs.already_applied')
+                        : job.viewerApplicationStatus)
+                  : context.tr(job.isExpired ? 'jobs.expired' : 'jobs.new'),
+              color: job.isExpired && !job.hasApplied
+                  ? const Color(0xFFB24A4A)
+                  : HomeColors.brand,
+              background: job.isExpired && !job.hasApplied
+                  ? const Color(0xFFFBEAEA)
+                  : const Color(0xFFE5F6E9),
+            ),
+          ],
           const SizedBox(height: 14),
           Wrap(
             spacing: 7,
@@ -125,8 +146,8 @@ class ExploreJobCard extends StatelessWidget {
           Row(
             children: [
               DefaultText(
-                text: _published(job.createdAt),
-                style: const TextStyle(color: HomeColors.muted, fontSize: 10.5),
+                text: _published(context, job.createdAt),
+                style: TextStyle(color: context.appMuted, fontSize: 10.5),
               ),
               const Spacer(),
               const Icon(
@@ -142,12 +163,59 @@ class ExploreJobCard extends StatelessWidget {
   );
 
   String _pretty(String text) => text.replaceAll('_', ' ');
-  String _published(String raw) {
+  String _scoreLabel(num score) {
+    final safe = score.clamp(0, 100);
+    return safe == safe.roundToDouble()
+        ? safe.round().toString()
+        : safe.toStringAsFixed(1);
+  }
+
+  String _published(BuildContext context, String raw) {
     final date = DateTime.tryParse(raw);
     return date == null
-        ? 'Recently published'
-        : DateFormat('MMM d, yyyy').format(date.toLocal());
+        ? context.tr('Recently published')
+        : DateFormat(
+            'MMM d, yyyy',
+            Localizations.localeOf(context).toLanguageTag(),
+          ).format(date.toLocal());
   }
+}
+
+class _StateBadge extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final Color color;
+  final Color background;
+  const _StateBadge({
+    required this.icon,
+    required this.text,
+    required this.color,
+    required this.background,
+  });
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+    decoration: BoxDecoration(
+      color: background,
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: TextStyle(
+            color: color,
+            fontSize: 10.5,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _Chip extends StatelessWidget {
@@ -158,17 +226,17 @@ class _Chip extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
     decoration: BoxDecoration(
-      color: const Color(0xFFF3F5F9),
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(9),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 13, color: HomeColors.muted),
+        Icon(icon, size: 13, color: context.appMuted),
         const SizedBox(width: 4),
         DefaultText(
           text: text,
-          style: const TextStyle(color: HomeColors.muted, fontSize: 10.5),
+          style: TextStyle(color: context.appMuted, fontSize: 10.5),
         ),
       ],
     ),
@@ -182,7 +250,7 @@ class _SkillChip extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
     decoration: BoxDecoration(
-      color: HomeColors.softPurple,
+      color: context.appSoftBrand,
       borderRadius: BorderRadius.circular(8),
     ),
     child: DefaultText(

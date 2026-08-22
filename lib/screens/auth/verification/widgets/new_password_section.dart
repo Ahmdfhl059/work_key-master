@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:work_key/shared/components/components.dart';
+import 'package:work_key/localization/app_localizations.dart';
 
 class NewPasswordSection extends StatelessWidget {
   final TextEditingController passwordController;
@@ -17,14 +18,14 @@ class NewPasswordSection extends StatelessWidget {
       children: [
         CustomTextField(
           controller: passwordController,
-          label: "New Password",
+          label: context.tr('reset_password.new_password'),
           hint: "••••••••",
           icon: Icons.lock_reset_rounded,
           isPassword: true,
         ),
         CustomTextField(
           controller: confirmPasswordController,
-          label: "Confirm New Password",
+          label: context.tr('reset_password.confirm_password'),
           hint: "••••••••",
           icon: Icons.lock_reset_rounded,
           isPassword: true,

@@ -29,13 +29,10 @@ void main() {
             'title': 'لديك مقابلة غدًا',
             'subtitle': 'مقابلة تقنية',
             'date_time': '2026-08-01T10:00:00+03:00',
-            'action': {
-              'label': 'عرض التفاصيل',
-              'route': '/interviews/42',
-            },
+            'action': {'label': 'عرض التفاصيل', 'route': '/interviews/42'},
           },
           'recommended_jobs': [
-            {'id': 18, 'title': 'Backend Developer'}
+            {'id': 18, 'title': 'Backend Developer'},
           ],
           'featured_companies': [],
           'latest_jobs': [],
@@ -54,23 +51,26 @@ void main() {
       expect(home.recommendationsAvailable, isFalse);
     });
 
-    test('uses semantic required action target instead of its display text', () {
-      final home = HomeResponseModel.fromMap({
-        'success': true,
-        'data': {
-          'viewer': {'type': 'job_seeker', 'is_authenticated': true},
-          'required_action': {
-            'type': 'anything',
-            'title': 'نص قابل للتغيير',
-            'target': {'type': 'test_assignment', 'id': 73},
+    test(
+      'uses semantic required action target instead of its display text',
+      () {
+        final home = HomeResponseModel.fromMap({
+          'success': true,
+          'data': {
+            'viewer': {'type': 'job_seeker', 'is_authenticated': true},
+            'required_action': {
+              'type': 'anything',
+              'title': 'نص قابل للتغيير',
+              'target': {'type': 'test_assignment', 'id': 73},
+            },
           },
-        },
-      });
+        });
 
-      expect(home.requiredAction?.target?.type, 'test_assignment');
-      expect(home.requiredAction?.target?.id, '73');
-      expect(home.requiredAction?.resolvedRoute, '/tests/73');
-    });
+        expect(home.requiredAction?.target?.type, 'test_assignment');
+        expect(home.requiredAction?.target?.id, '73');
+        expect(home.requiredAction?.resolvedRoute, '/tests/73');
+      },
+    );
 
     test('extracts readable text from structured job values', () {
       final home = HomeResponseModel.fromMap({
@@ -85,10 +85,14 @@ void main() {
               'match': {
                 'score': 90,
                 'reasons': [
-                  {'key': 'skills', 'value': 'Four matching skills', 'result': true}
+                  {
+                    'key': 'skills',
+                    'value': 'Four matching skills',
+                    'result': true,
+                  },
                 ],
               },
-            }
+            },
           ],
         },
       });
@@ -100,25 +104,34 @@ void main() {
       expect(job.matchReasons.single, isNot(contains('key')));
     });
 
+    test('keeps fractional home recommendation scores', () {
+      final home = HomeResponseModel.fromMap({
+        'success': true,
+        'data': {
+          'viewer': {'type': 'job_seeker', 'is_authenticated': true},
+          'recommended_jobs': [
+            {
+              'id': 2,
+              'title': 'Mobile Developer',
+              'match': {'score': 91.75},
+            },
+          ],
+        },
+      });
+
+      expect(home.recommendedJobs.single.matchScore, 91.75);
+    });
+
     test('parses a guest payload', () {
       final payload = {
         'success': true,
         'data': {
-          'viewer': {
-            'type': 'guest',
-            'is_authenticated': false,
-          },
+          'viewer': {'type': 'guest', 'is_authenticated': false},
           'hero': {
             'title': 'وظيفتك المناسبة تبدأ من هنا',
             'description': 'اكتشف فرصًا تناسب مهاراتك وطموحاتك.',
-            'primary_action': {
-              'label': 'إنشاء حساب',
-              'route': '/register',
-            },
-            'secondary_action': {
-              'label': 'تسجيل الدخول',
-              'route': '/login',
-            },
+            'primary_action': {'label': 'إنشاء حساب', 'route': '/register'},
+            'secondary_action': {'label': 'تسجيل الدخول', 'route': '/login'},
           },
           'latest_jobs': [],
           'featured_companies': [],
@@ -127,7 +140,7 @@ void main() {
               'key': 'smart_recommendations',
               'title': 'توصيات ذكية',
               'description': 'وظائف تناسب مهاراتك وخبرتك',
-            }
+            },
           ],
         },
       };
@@ -140,5 +153,31 @@ void main() {
       expect(home.appFeatures.length, 1);
       expect(home.isGuest, isTrue);
     });
+
+    test(
+      'parses company image and logo independently and ignores null text',
+      () {
+        final home = HomeResponseModel.fromMap({
+          'success': true,
+          'data': {
+            'viewer': {'type': 'guest', 'is_authenticated': false},
+            'featured_companies': [
+              {
+                'id': 7,
+                'name': 'Workey',
+                'image_url': 'https://example.com/cover.jpg',
+                'logo_url': 'https://example.com/logo.png',
+              },
+              {'id': 8, 'name': 'No images', 'image_url': 'null', 'logo': null},
+            ],
+          },
+        });
+
+        expect(home.featuredCompanies.first.coverUrl, contains('cover.jpg'));
+        expect(home.featuredCompanies.first.logoUrl, contains('logo.png'));
+        expect(home.featuredCompanies.last.coverUrl, isNull);
+        expect(home.featuredCompanies.last.logoUrl, isNull);
+      },
+    );
   });
 }

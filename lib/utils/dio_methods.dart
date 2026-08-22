@@ -1,5 +1,5 @@
-import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'constants.dart';
 import 'headers.dart';
 import 'dio_error_handler.dart';
@@ -26,57 +26,83 @@ class RemoteApi {
   }) async {
     // تنظيف المسار لضمان عدم تكرار السلاش
     String cleanPath = url.startsWith('/') ? url.substring(1) : url;
-    
-    print('--- 🚀 Request Start ---');
-    print('Full URL: ${_dio.options.baseUrl}$cleanPath');
-    print('Method: $method');
-    if (body != null) print('Payload: $body');
+
+    debugPrint('--- 🚀 Request Start ---');
+    debugPrint('Full URL: ${_dio.options.baseUrl}$cleanPath');
+    debugPrint('Method: $method');
+    if (body != null) debugPrint('Payload: $body');
 
     try {
       String? token = CacheHelper.getData(key: 'token');
-      
+
       // لا نرسل التوكن في طلبات الدخول والتسجيل
-      bool isAuthRequest = cleanPath.contains('auth/login') || cleanPath.contains('auth/register');
-      
+      bool isAuthRequest =
+          cleanPath.contains('auth/login') ||
+          cleanPath.contains('auth/register');
+
       Map<String, String> finalHeaders;
       if (isAuthRequest) {
         finalHeaders = headersWithContent;
       } else {
-        finalHeaders = headers ?? (token != null ? headersWithAuthContent(token) : headersWithContent);
+        finalHeaders =
+            headers ??
+            (token != null
+                ? headersWithAuthContent(token)
+                : headersWithContent);
       }
+      // Dio must generate the multipart boundary itself. Keeping the global
+      // application/json header here makes uploaded files arrive as an
+      // invalid JSON request on stricter servers.
+      if (body is FormData) {
+        finalHeaders = Map<String, String>.from(finalHeaders)
+          ..removeWhere((key, _) => key.toLowerCase() == 'content-type');
+      }
+      final language = CacheHelper.getData(key: 'LOCALE')?.toString() ?? 'en';
       finalHeaders = {
         ...finalHeaders,
-        'Accept-Language': CacheHelper.getData(key: 'LOCALE')?.toString() ?? 'en',
+        'Accept-Language': language,
+        'Content-Language': language,
       };
 
       final response = await _dio.request(
         cleanPath,
         data: body,
         queryParameters: queryParameters,
-        options: Options(
-          method: method,
-          headers: finalHeaders,
-        ),
+        options: Options(method: method, headers: finalHeaders),
       );
-      
-      print('--- ✅ Success Response: ${response.statusCode} ---');
+
+      debugPrint('--- ✅ Success Response: ${response.statusCode} ---');
       return response;
     } on DioException catch (e) {
-      print('--- ❌ Server Error ---');
+      debugPrint('--- ❌ Server Error ---');
       if (e.response != null) {
-        print('Status: ${e.response?.statusCode}');
-        print('Data: ${e.response?.data}');
+        debugPrint('Status: ${e.response?.statusCode}');
+        debugPrint('Data: ${e.response?.data}');
       }
       if (preserveDioError) rethrow;
       throw DioErrorHandler.handle(e);
     } catch (e) {
-      print('--- ⚠️ System Error: $e ---');
-      throw Exception('حدث خطأ غير متوقع');
+      debugPrint('--- ⚠️ System Error: $e ---');
+      final ar = CacheHelper.getData(key: 'LOCALE') == 'ar';
+      throw Exception(
+        ar ? 'حدث خطأ غير متوقع.' : 'An unexpected error occurred.',
+      );
     }
   }
 
-  static Future<Response> post(String url, {dynamic body, Map<String, String>? headers}) async {
-    return _makeRequest('POST', url, body: body, headers: headers);
+  static Future<Response> post(
+    String url, {
+    dynamic body,
+    Map<String, String>? headers,
+    bool preserveDioError = false,
+  }) async {
+    return _makeRequest(
+      'POST',
+      url,
+      body: body,
+      headers: headers,
+      preserveDioError: preserveDioError,
+    );
   }
 
   static Future<Response> get(
@@ -94,15 +120,26 @@ class RemoteApi {
     );
   }
 
-  static Future<Response> put(String url, {dynamic body, Map<String, String>? headers}) async {
+  static Future<Response> put(
+    String url, {
+    dynamic body,
+    Map<String, String>? headers,
+  }) async {
     return _makeRequest('PUT', url, body: body, headers: headers);
   }
 
-  static Future<Response> patch(String url, {dynamic body, Map<String, String>? headers}) async {
+  static Future<Response> patch(
+    String url, {
+    dynamic body,
+    Map<String, String>? headers,
+  }) async {
     return _makeRequest('PATCH', url, body: body, headers: headers);
   }
 
-  static Future<Response> delete(String url, {Map<String, String>? headers}) async {
+  static Future<Response> delete(
+    String url, {
+    Map<String, String>? headers,
+  }) async {
     return _makeRequest('DELETE', url, headers: headers);
   }
 }

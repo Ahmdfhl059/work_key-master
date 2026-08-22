@@ -10,6 +10,7 @@ void main() {
     await CacheHelper.init();
 
     await tester.pumpWidget(const MyApp());
+    await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.byType(SplashScreen), findsOneWidget);
   });

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 //import '../../../../core/constants/app_colors.dart';
 
 class OnboardingPage extends StatelessWidget {
@@ -15,27 +16,24 @@ class OnboardingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
       child: Column(
         children: [
-
           const SizedBox(height: 30),
 
-          Image.asset(
-            image,
-            height: 300,
-          ),
+          Image.asset(image, height: 300),
 
           const SizedBox(height: 30),
 
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: colors.onSurface,
             ),
           ),
 
@@ -44,10 +42,7 @@ class OnboardingPage extends StatelessWidget {
           Text(
             description,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
+            style: TextStyle(fontSize: 16, color: colors.onSurfaceVariant),
           ),
         ],
       ),

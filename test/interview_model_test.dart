@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:work_key/data/models/interview_model.dart';
+import 'package:work_key/data/repo/interviews_repo.dart';
 
 void main() {
   test('parses paginated interview response and localized values', () {
@@ -64,5 +65,23 @@ void main() {
     expect(interview.meetingLink, isNull);
     expect(interview.jobTitle, 'Interview');
     expect(interview.needsConfirmation, isFalse);
+  });
+
+  test('parses secure embedded interview video session', () {
+    final session = InterviewVideoSession.fromMap({
+      'provider': 'livekit',
+      'server_url': 'wss://workey.livekit.cloud',
+      'participant_token': 'secure-token',
+      'room': {'name': 'workey-interview-123'},
+      'participant': {'display_name': 'Karim', 'role': 'candidate'},
+      'expires_at': '2026-08-13T10:15:00Z',
+      'fallback_meeting_link': null,
+    });
+
+    expect(session.provider, 'livekit');
+    expect(session.serverUrl, startsWith('wss://'));
+    expect(session.participantToken, 'secure-token');
+    expect(session.roomName, 'workey-interview-123');
+    expect(session.participantRole, 'candidate');
   });
 }

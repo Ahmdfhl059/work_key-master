@@ -2,48 +2,77 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:work_key/logic/auth_cubit/auth_cubit.dart';
 import 'package:work_key/logic/auth_cubit/auth_state.dart';
+import 'package:work_key/localization/app_localizations.dart';
 import 'package:work_key/screens/auth/verification/verification_screen.dart';
 import 'package:work_key/shared/components/components.dart';
-import 'package:work_key/utils/constants.dart';
+import 'package:work_key/shared/components/app_snackbar.dart';
 import '../login/login_screen.dart';
 import 'widgets/register_header.dart';
 import '../widgets/guest_access_button.dart';
+import '../../../data/models/city_model.dart';
+import '../../../data/repo/reference_repo.dart';
 
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    var emailController = TextEditingController();
-    var nameController = TextEditingController();
-    var phoneController = TextEditingController();
-    var passwordController = TextEditingController();
-    var confirmPasswordController = TextEditingController();
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
 
+class _RegisterScreenState extends State<RegisterScreen> {
+  final emailController = TextEditingController();
+  final nameController = TextEditingController();
+  final phoneController = TextEditingController();
+  final locationController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+  late final Future<List<CityModel>> cities = ReferenceRepo().getCities();
+  int? selectedCityId;
+
+  @override
+  void dispose() {
+    for (final controller in [
+      emailController,
+      nameController,
+      phoneController,
+      locationController,
+      passwordController,
+      confirmPasswordController,
+    ]) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return BlocConsumer<AuthCubit, AuthStates>(
       listener: (context, state) {
         if (state is AuthSuccessState) {
           print('--- UI Success: Account Created ---');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.userModel.message ?? 'Success'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          navigateTo(
+          AppSnackBar.success(
             context,
-            VerificationCodeScreen(email: emailController.text.trim()),
+            state.userModel.message ?? 'Success',
+            title: 'Account created',
+          );
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => VerificationCodeScreen(
+                email: emailController.text.trim(),
+                flow: VerificationFlow.account,
+                loginPassword: passwordController.text,
+              ),
+            ),
           );
         } else if (state is AuthErrorState) {
           print('--- UI Error: Registration Failed: ${state.error} ---');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.error), backgroundColor: Colors.red),
-          );
+          AppSnackBar.error(context, state.error, title: 'Registration failed');
         }
       },
       builder: (context, state) {
+        final colors = Theme.of(context).colorScheme;
         return Scaffold(
-          backgroundColor: const Color(0xFFF8F9FD),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: SafeArea(
             child: ResponsiveContent(
               maxWidth: 520,
@@ -73,9 +102,57 @@ class RegisterScreen extends StatelessWidget {
 
                     CustomTextField(
                       controller: phoneController,
+                      keyboardType: TextInputType.phone,
                       label: "Phone Number",
                       hint: "+963 9xx xxx xxx",
                       icon: Icons.phone_android_rounded,
+                    ),
+
+                    FutureBuilder<List<CityModel>>(
+                      future: cities,
+                      builder: (context, snapshot) {
+                        final options = snapshot.data ?? const <CityModel>[];
+                        return DropdownButtonFormField<int>(
+                          initialValue: selectedCityId,
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            labelText: context.tr('profile.city'),
+                            prefixIcon: const Icon(Icons.location_city_rounded),
+                            suffixIcon:
+                                snapshot.connectionState ==
+                                    ConnectionState.waiting
+                                ? const Padding(
+                                    padding: EdgeInsets.all(14),
+                                    child: SizedBox.square(
+                                      dimension: 17,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  )
+                                : null,
+                          ),
+                          items: options
+                              .map(
+                                (city) => DropdownMenuItem(
+                                  value: city.id,
+                                  child: Text(city.name),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: options.isEmpty
+                              ? null
+                              : (value) =>
+                                    setState(() => selectedCityId = value),
+                        );
+                      },
+                    ),
+                    SizedBox(height: 16,),
+                    CustomTextField(
+                      controller: locationController,
+                      label: context.tr('profile.location_details'),
+                      hint: context.tr('profile.location_hint'),
+                      icon: Icons.pin_drop_outlined,
                     ),
 
                     CustomTextField(
@@ -112,11 +189,10 @@ class RegisterScreen extends StatelessWidget {
                                 print(
                                   '--- UI Validation Failed: Empty Fields ---',
                                 );
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Please fill in all fields'),
-                                    backgroundColor: Colors.orange,
-                                  ),
+                                AppSnackBar.warning(
+                                  context,
+                                  'Please fill in all fields',
+                                  title: 'Missing information',
                                 );
                                 return;
                               }
@@ -127,11 +203,10 @@ class RegisterScreen extends StatelessWidget {
                                 print(
                                   '--- UI Validation Failed: Password Mismatch ---',
                                 );
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Passwords do not match'),
-                                    backgroundColor: Colors.orange,
-                                  ),
+                                AppSnackBar.warning(
+                                  context,
+                                  'Passwords do not match',
+                                  title: 'Check your password',
                                 );
                                 return;
                               }
@@ -146,21 +221,26 @@ class RegisterScreen extends StatelessWidget {
                                 password: passwordController.text,
                                 passwordConfirmation:
                                     confirmPasswordController.text,
+                                location: locationController.text,
+                                cityId: selectedCityId,
                               );
                             },
                           ),
                     const SizedBox(height: 30),
-                    const Row(
+                    Row(
                       children: [
-                        Expanded(child: Divider()),
+                        const Expanded(child: Divider()),
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 15),
+                          padding: const EdgeInsets.symmetric(horizontal: 15),
                           child: DefaultText(
                             text: "OR",
-                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                            style: TextStyle(
+                              color: colors.onSurfaceVariant,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
-                        Expanded(child: Divider()),
+                        const Expanded(child: Divider()),
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -171,7 +251,7 @@ class RegisterScreen extends StatelessWidget {
                       children: [
                         DefaultText(
                           text: "Do you have an account?",
-                          style: TextStyle(color: Colors.grey.shade600),
+                          style: TextStyle(color: colors.onSurfaceVariant),
                         ),
                         DefaultTextButton(
                           onPressed: () {
@@ -179,7 +259,7 @@ class RegisterScreen extends StatelessWidget {
                           },
                           text: "Login",
                           textStyle: TextStyle(
-                            color: primary,
+                            color: colors.primary,
                             fontWeight: FontWeight.w900,
                           ),
                         ),

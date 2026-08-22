@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:work_key/data/models/profile_model.dart';
 import 'package:work_key/logic/auth_cubit/auth_cubit.dart';
 import 'package:work_key/logic/auth_cubit/auth_state.dart';
 import 'package:work_key/logic/local_cubit/local_cubit.dart';
+import 'package:work_key/logic/theme_cubit/theme_cubit.dart';
+import 'package:work_key/localization/app_localizations.dart';
 import 'package:work_key/logic/profile_cubit/profile_cubit.dart';
 import 'package:work_key/logic/profile_cubit/profile_state.dart';
 import 'package:work_key/logic/cv_cubit/cv_cubit.dart';
+import 'package:work_key/logic/cv_cubit/cv_state.dart';
 import 'package:work_key/screens/auth/login/login_screen.dart';
 import 'package:work_key/screens/profile/profile_strings.dart';
 import 'package:work_key/screens/profile/widgets/profile_edit_sheet.dart';
@@ -15,6 +19,7 @@ import 'package:work_key/screens/profile/widgets/profile_cv_section.dart';
 import 'package:work_key/screens/profile/widgets/profile_manage_sheets.dart';
 import 'package:work_key/screens/interviews/interviews_screen.dart';
 import 'package:work_key/shared/components/components.dart';
+import 'package:work_key/shared/components/app_snackbar.dart';
 import 'package:work_key/utils/constants.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -54,9 +59,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
         },
       ),
+      BlocListener<CvCubit, CvState>(
+        listenWhen: (previous, current) =>
+            previous.profileChanged != current.profileChanged ||
+            previous.message != current.message ||
+            previous.error != current.error,
+        listener: (context, state) {
+          if (state.profileChanged) {
+            context.read<ProfileCubit>().getProfile();
+          }
+          final feedback = state.error ?? state.message;
+          if (feedback != null && feedback.isNotEmpty) {
+            final localized = feedback.startsWith('cv.')
+                ? context.tr(feedback)
+                : feedback;
+            if (state.error != null) {
+              AppSnackBar.error(context, localized);
+            } else {
+              AppSnackBar.success(context, localized);
+            }
+            context.read<CvCubit>().consumeFeedback();
+          }
+        },
+      ),
     ],
     child: Material(
-      color: HomeColors.canvas,
+      color: Theme.of(context).colorScheme.surface,
       child: BlocBuilder<ProfileCubit, ProfileStates>(
         builder: (context, state) {
           final strings = ProfileStrings.of(context);
@@ -65,7 +93,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
           if (profile == null && state is ProfileErrorState) {
             return _ProfileError(
-              message: 'Unable to load your profile.',
+              message: context.tr('profile.load_error'),
               retry: context.read<ProfileCubit>().getProfile,
             );
           }
@@ -74,6 +102,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onRefresh: () async => context.read<ProfileCubit>().getProfile(),
             child: ResponsiveContent(
               maxWidth: 760,
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(
                   parent: BouncingScrollPhysics(),
@@ -85,8 +114,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Expanded(
                         child: DefaultText(
                           text: strings.title,
-                          style: const TextStyle(
-                            color: HomeColors.ink,
+                          style: TextStyle(
+                            color: context.appInk,
                             fontSize: 27,
                             fontWeight: FontWeight.w900,
                           ),
@@ -105,19 +134,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     profile: profile!,
                     editLabel: strings.edit,
                     edit: () => showProfileEditSheet(context, profile!),
-                    onAvatarTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Profile photo upload is waiting for backend support.',
-                          ),
-                        ),
-                      );
-                    },
+                    uploadAvatar: _pickAvatar,
                   ),
                   const SizedBox(height: 16),
                   ProfileOverview(
                     profile: profile!,
+                    onEditProfile: () =>
+                        showProfileEditSheet(context, profile!),
                     onManageSkills: () => showSkillsManager(context, profile!),
                     onManageExperience: () =>
                         showExperienceManager(context, profile!),
@@ -127,21 +150,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 14),
                   const ProfileCvSection(),
                   const SizedBox(height: 14),
-                  InkWell(
+                  AnimatedPressableCard(
                     onTap: () => navigateTo(context, const InterviewsScreen()),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(22),
                     child: Container(
                       padding: const EdgeInsets.all(17),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: HomeColors.divider),
+                        gradient: LinearGradient(
+                          colors: [
+                            Theme.of(context).colorScheme.surfaceContainer,
+                            Theme.of(context).colorScheme.primaryContainer
+                                .withValues(alpha: .32),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(22),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                        ),
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
                           CircleAvatar(
                             radius: 22,
-                            backgroundColor: HomeColors.softPurple,
+                            backgroundColor: context.appSoftBrand,
                             child: Icon(
                               Icons.video_call_rounded,
                               color: HomeColors.purple,
@@ -153,18 +184,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 DefaultText(
-                                  text: 'My interviews',
+                                  text: context.tr('interviews.title'),
                                   style: TextStyle(
-                                    color: HomeColors.ink,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w900,
                                   ),
                                 ),
                                 SizedBox(height: 3),
                                 DefaultText(
-                                  text: 'View schedules and attendance details',
+                                  text: context.tr('interviews.profile_hint'),
                                   style: TextStyle(
-                                    color: HomeColors.muted,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                                     fontSize: 11,
                                   ),
                                 ),
@@ -174,7 +209,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Icon(
                             Icons.arrow_forward_ios_rounded,
                             size: 15,
-                            color: HomeColors.muted,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ],
                       ),
@@ -203,12 +238,73 @@ class _ProfileScreenState extends State<ProfileScreen> {
     ),
   );
 
+  Future<void> _pickAvatar() async {
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined),
+                title: Text(context.tr('profile.choose_gallery')),
+                onTap: () => Navigator.pop(context, 'gallery'),
+              ),
+              if (profile?.user.avatarUrl != null)
+                ListTile(
+                  leading: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: Color(0xFFB44343),
+                  ),
+                  title: Text(context.tr('common.delete')),
+                  onTap: () => Navigator.pop(context, 'delete'),
+                ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera_outlined),
+                title: Text(context.tr('profile.take_photo')),
+                onTap: () => Navigator.pop(context, 'camera'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (choice == null || !mounted) return;
+    if (choice == 'delete') {
+      if (profile?.user.avatarUrl != null) {
+        final removed = await context.read<ProfileCubit>().deleteAvatar();
+        if (removed && mounted) {
+          PaintingBinding.instance.imageCache
+            ..clear()
+            ..clearLiveImages();
+        }
+      }
+      return;
+    }
+    final source = choice == 'camera'
+        ? ImageSource.camera
+        : ImageSource.gallery;
+    final image = await ImagePicker().pickImage(
+      source: source,
+      imageQuality: 88,
+      maxWidth: 1600,
+    );
+    if (image == null || !mounted) return;
+    PaintingBinding.instance.imageCache
+      ..clear()
+      ..clearLiveImages();
+    await context.read<ProfileCubit>().uploadAvatar(image.path);
+    if (mounted) context.read<ProfileCubit>().getProfile();
+  }
+
   Future<void> _settings(BuildContext context, ProfileStrings strings) async =>
       showModalBottomSheet(
         context: context,
         backgroundColor: Colors.transparent,
         builder: (_) => Material(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
           child: SafeArea(
             child: Padding(
@@ -219,13 +315,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   DefaultText(
                     text: strings.settings,
-                    style: const TextStyle(
-                      color: HomeColors.ink,
+                    style: TextStyle(
+                      color: context.appInk,
                       fontSize: 20,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   const SizedBox(height: 14),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Icons.dark_mode_rounded
+                          : Icons.light_mode_rounded,
+                      color: HomeColors.purple,
+                    ),
+                    title: Text(context.tr('settings.theme')),
+                    subtitle: Text(
+                      Theme.of(context).brightness == Brightness.dark
+                          ? context.tr('settings.dark')
+                          : context.tr('settings.light'),
+                    ),
+                    trailing: Switch(
+                      value: Theme.of(context).brightness == Brightness.dark,
+                      onChanged: (dark) =>
+                          context.read<ThemeCubit>().toggle(dark),
+                    ),
+                  ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(
+                      Icons.devices_outlined,
+                      color: Color(0xFFB44343),
+                    ),
+                    title: Text(
+                      context.tr('auth.logout_all'),
+                      style: const TextStyle(color: Color(0xFFB44343)),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _confirmLogoutAll(context, strings);
+                    },
+                  ),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(
@@ -269,6 +400,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       );
+
+  Future<void> _confirmLogoutAll(
+    BuildContext context,
+    ProfileStrings strings,
+  ) async {
+    final confirmed =
+        await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: Text(context.tr('auth.logout_all')),
+            content: Text(context.tr('auth.logout_all_confirm')),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: Text(context.tr('common.cancel')),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: Text(context.tr('auth.logout_all')),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+    if (confirmed && context.mounted) context.read<AuthCubit>().logoutAll();
+  }
+
   Future<void> _confirmLogout(
     BuildContext context,
     ProfileStrings strings,
@@ -278,15 +436,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           context: context,
           builder: (_) => AlertDialog(
             title: Text(strings.logout),
-            content: Text(
-              strings.ar
-                  ? 'هل أنت متأكد من تسجيل الخروج؟'
-                  : 'Are you sure you want to log out?',
-            ),
+            content: Text(context.tr('auth.logout_confirm')),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text(strings.ar ? 'إلغاء' : 'Cancel'),
+                child: Text(context.tr('common.cancel')),
               ),
               FilledButton(
                 onPressed: () => Navigator.pop(context, true),
@@ -304,7 +458,7 @@ class _ProfileLoading extends StatelessWidget {
   const _ProfileLoading();
   @override
   Widget build(BuildContext context) => Material(
-    color: HomeColors.canvas,
+    color: Theme.of(context).scaffoldBackgroundColor,
     child: ResponsiveContent(
       maxWidth: 760,
       child: ListView(
@@ -314,7 +468,7 @@ class _ProfileLoading extends StatelessWidget {
             width: 180,
             height: 32,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(9),
             ),
           ),
@@ -322,7 +476,7 @@ class _ProfileLoading extends StatelessWidget {
           Container(
             height: 225,
             decoration: BoxDecoration(
-              color: HomeColors.softPurple,
+              color: context.appSoftBrand,
               borderRadius: BorderRadius.circular(27),
             ),
           ),
@@ -333,7 +487,7 @@ class _ProfileLoading extends StatelessWidget {
               height: 135,
               margin: const EdgeInsets.only(bottom: 14),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(21),
               ),
             ),
@@ -350,32 +504,22 @@ class _ProfileError extends StatelessWidget {
   const _ProfileError({required this.message, required this.retry});
   @override
   Widget build(BuildContext context) => Material(
-    color: HomeColors.canvas,
+    color: Theme.of(context).scaffoldBackgroundColor,
     child: Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
-              Icons.person_off_outlined,
-              size: 58,
-              color: HomeColors.muted,
-            ),
+            Icon(Icons.person_off_outlined, size: 58, color: context.appMuted),
             const SizedBox(height: 12),
             DefaultText(
               text: message,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: HomeColors.ink),
+              style: TextStyle(color: context.appInk),
             ),
             const SizedBox(height: 16),
-            DefaultButton(
-              width: 150,
-              background: HomeColors.purple,
-              text: 'Try again',
-              uppercase: false,
-              onPress: retry,
-            ),
+            ModernRetryButton(onRetry: retry),
           ],
         ),
       ),

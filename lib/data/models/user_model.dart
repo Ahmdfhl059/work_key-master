@@ -1,3 +1,5 @@
+import '../../utils/media_url.dart';
+
 class UserModel {
   String? message;
   final int id;
@@ -7,6 +9,7 @@ class UserModel {
   String status;
   String phone;
   String? avatarUrl;
+  final bool emailVerified;
 
   UserModel({
     this.message,
@@ -17,6 +20,7 @@ class UserModel {
     required this.status,
     required this.phone,
     this.avatarUrl,
+    this.emailVerified = true,
   });
 
   factory UserModel.initial() => UserModel(
@@ -28,6 +32,7 @@ class UserModel {
     status: '',
     phone: '',
     avatarUrl: null,
+    emailVerified: false,
   );
 
   Map<String, dynamic> toMap() {
@@ -40,6 +45,7 @@ class UserModel {
       'status': status,
       'phone': phone,
       'avatar_url': avatarUrl,
+      'email_verified': emailVerified,
     };
   }
 
@@ -49,15 +55,45 @@ class UserModel {
       name: map['name']?.toString() ?? '',
       email: map['email']?.toString() ?? '',
       message: map['message']?.toString() ?? '',
-      role: map['role']?.toString() ?? '',
-      status: map['status']?.toString() ?? '',
+      role: _displayValue(map['role']),
+      status: _displayValue(map['status']),
       phone: map['phone']?.toString() ?? '',
-      avatarUrl: _nullableString(map['avatar_url'] ?? map['profile_image_url']),
+      avatarUrl: resolveMediaUrl(
+        map['avatar_url'] ??
+            map['profile_image_url'] ??
+            map['profile_photo_url'] ??
+            map['profile_picture_url'] ??
+            map['avatar'] ??
+            map['profile_image'] ??
+            map['photo_url'] ??
+            map['image_url'] ??
+            map['image'],
+      ),
+      // Missing verification fields mean the backend does not expose this
+      // capability. Explicit false/null email_verified_at must never be
+      // treated as a verified login.
+      emailVerified: _emailVerified(map),
     );
+  }
+
+  static bool _emailVerified(Map<String, dynamic> map) {
+    if (map.containsKey('email_verified_at')) {
+      return _nullableString(map['email_verified_at']) != null;
+    }
+    final value = map['is_email_verified'] ?? map['email_verified'];
+    if (value == null) return true;
+    return value == true || value == 1 || value.toString() == '1';
   }
 
   static String? _nullableString(dynamic value) {
     final text = value?.toString().trim() ?? '';
     return text.isEmpty || text.toLowerCase() == 'null' ? null : text;
+  }
+
+  static String _displayValue(dynamic value) {
+    if (value is Map) {
+      return '${value['value'] ?? value['label'] ?? value['key'] ?? ''}';
+    }
+    return '${value ?? ''}';
   }
 }

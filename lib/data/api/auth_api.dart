@@ -3,7 +3,11 @@ import '../../utils/dio_methods.dart';
 
 class AuthApi {
   Future<Response> login(Map<String, dynamic> data) async {
-    return await RemoteApi.post('auth/login', body: data);
+    return await RemoteApi.post(
+      'auth/login',
+      body: data,
+      preserveDioError: true,
+    );
   }
 
   Future<Response> registerJobSeeker(Map<String, dynamic> data) async {
@@ -18,6 +22,20 @@ class AuthApi {
     return await RemoteApi.post('auth/forgot-password', body: {'email': email});
   }
 
+  Future<Response> resendEmailOtp(String email) async {
+    return await RemoteApi.post(
+      'auth/email/resend-otp',
+      body: {'email': email},
+    );
+  }
+
+  Future<Response> verifyEmailOtp(String email, String otp) async {
+    return await RemoteApi.post(
+      'auth/email/verify-otp',
+      body: {'email': email, 'otp': otp},
+    );
+  }
+
   Future<Response> resetPassword(Map<String, dynamic> data) async {
     return await RemoteApi.post('auth/reset-password', body: data);
   }
@@ -28,5 +46,9 @@ class AuthApi {
 
   Future<Response> logout() async {
     return await RemoteApi.post('auth/logout');
+  }
+
+  Future<Response> logoutAll() async {
+    return await RemoteApi.post('auth/logout-all');
   }
 }

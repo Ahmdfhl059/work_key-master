@@ -15,6 +15,9 @@ class InterviewsApi {
   Future<Response> confirmInterview(int id) =>
       RemoteApi.post('/interviews/$id/confirm');
 
+  Future<Response> createVideoSession(int id) =>
+      RemoteApi.post('/interviews/$id/video-session');
+
   // Employer endpoints are kept for the existing employer-side flows.
   Future<Response> scheduleInterview(
     int applicationId,

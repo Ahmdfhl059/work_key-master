@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../utils/language_cache_helper.dart';
+import '../../services/push_notification_service.dart';
 import 'local_state.dart';
 
 class LocaleCubit extends Cubit<LocaleState> {
@@ -17,5 +20,6 @@ class LocaleCubit extends Cubit<LocaleState> {
   Future<void> changeLanguage(String languageCode) async {
     await LanguageCacheHelper().cacheLanguageCode(languageCode);
     emit(ChangeLocaleState(locale: Locale(languageCode)));
+    unawaited(PushNotificationService.instance.syncTokenWithBackend());
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:work_key/utils/constants.dart';
 
 class PinCodeSection extends StatelessWidget {
   final TextEditingController controller;
@@ -8,27 +7,30 @@ class PinCodeSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PinCodeTextField(
-      appContext: context,
+    final colors = Theme.of(context).colorScheme;
+    return MaterialPinField(
       length: 6,
-      controller: controller,
+      pinController: PinInputController(textController: controller),
       keyboardType: TextInputType.number,
-      animationType: AnimationType.fade,
-      pinTheme: PinTheme(
-        shape: PinCodeFieldShape.box,
-        borderRadius: BorderRadius.circular(15),
-        fieldHeight: 50,
-        fieldWidth: 40,
-        activeFillColor: Colors.white,
-        inactiveFillColor: Colors.white,
-        selectedFillColor: Colors.white,
-        activeColor: primary,
-        inactiveColor: Colors.grey.shade200,
-        selectedColor: primary,
+      theme: MaterialPinTheme(
+        shape: MaterialPinShape.outlined,
+        borderRadius: const BorderRadius.all(Radius.circular(15)),
+        cellSize: const Size(40, 50),
+        fillColor: colors.surfaceContainer,
+        followingFillColor: colors.surfaceContainer,
+        focusedFillColor: colors.primaryContainer.withValues(alpha: .5),
+        filledFillColor: colors.surfaceContainer,
+        borderColor: colors.outlineVariant,
+        focusedBorderColor: colors.primary,
+        filledBorderColor: colors.primary,
+        cursorColor: colors.primary,
+        textStyle: TextStyle(
+          color: colors.onSurface,
+          fontWeight: FontWeight.w800,
+        ),
+        entryAnimation: MaterialPinAnimation.fade,
+        animationDuration: const Duration(milliseconds: 300),
       ),
-      animationDuration: const Duration(milliseconds: 300),
-      backgroundColor: Colors.transparent,
-      enableActiveFill: true,
       onChanged: (value) {},
     );
   }

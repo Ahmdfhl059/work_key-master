@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import '../api/auth_api.dart';
 import '../models/user_model.dart';
 import '../../utils/shared%20preferences.dart';
+import '../../services/push_notification_service.dart';
 
 class AuthRepo {
   final AuthApi _authApi = AuthApi();
@@ -16,14 +19,18 @@ class AuthRepo {
       print('Data: ${response.data}');
 
       Map<String, dynamic> responseData = response.data;
-      
+
       if (responseData['success'] == true) {
         String token = responseData['data']['token'];
-        print('Login Success. Token: $token');
-        await CacheHelper.saveData(key: 'token', value: token);
-        
         UserModel user = UserModel.fromMap(responseData['data']['user']);
         user.message = responseData['message'];
+        if (user.emailVerified) {
+          print('Login Success. Token received.');
+          await CacheHelper.saveData(key: 'token', value: token);
+          unawaited(PushNotificationService.instance.syncTokenWithBackend());
+        } else {
+          await CacheHelper.removeData(key: 'token');
+        }
         return user;
       } else {
         print('Login Failed: ${responseData['message']}');
@@ -31,6 +38,22 @@ class AuthRepo {
         errorUser.message = responseData['message'];
         return errorUser;
       }
+    } on DioException catch (error) {
+      final data = error.response?.data;
+      final root = data is Map
+          ? Map<String, dynamic>.from(data)
+          : const <String, dynamic>{};
+      final code = root['code']?.toString().toUpperCase();
+      if (code == 'EMAIL_NOT_VERIFIED') {
+        final user = UserModel.initial();
+        user.message = 'EMAIL_NOT_VERIFIED';
+        return user;
+      }
+      print('--- AuthRepo: Error Caught ---');
+      print('Error: ${root['message'] ?? error.message}');
+      final user = UserModel.initial();
+      user.message = root['message']?.toString() ?? error.message;
+      return user;
     } catch (e) {
       print('--- AuthRepo: Error Caught ---');
       print('Error: $e');
@@ -53,15 +76,20 @@ class AuthRepo {
       print('Data: ${response.data}');
 
       Map<String, dynamic> responseData = response.data;
-      
+
       if (responseData['success'] == true || response.statusCode == 201) {
         print('Register Success');
-        if (responseData['data'] != null && responseData['data']['token'] != null) {
-            await CacheHelper.saveData(key: 'token', value: responseData['data']['token']);
-        }
-        
-        UserModel user = UserModel.fromMap(responseData['data']?['user'] ?? responseData['data']);
+        UserModel user = UserModel.fromMap(
+          responseData['data']?['user'] ?? responseData['data'],
+        );
         user.message = responseData['message'];
+        final token = responseData['data']?['token'];
+        if (token != null && user.emailVerified) {
+          await CacheHelper.saveData(key: 'token', value: token);
+          unawaited(PushNotificationService.instance.syncTokenWithBackend());
+        } else {
+          await CacheHelper.removeData(key: 'token');
+        }
         return user;
       } else {
         print('Register Failed: ${responseData['message']}');
@@ -78,15 +106,47 @@ class AuthRepo {
     }
   }
 
+  Future<String> resendAccountVerification({
+    required String email,
+    required String password,
+  }) async {
+    final response = await _authApi.resendEmailOtp(email);
+    final root = Map<String, dynamic>.from(response.data as Map);
+    if (root['success'] != true) {
+      throw StateError(
+        root['message']?.toString() ?? 'Could not resend verification code',
+      );
+    }
+    return root['message']?.toString() ?? 'A new code was sent';
+  }
+
+  Future<String> verifyAccountEmail({
+    required String email,
+    required String otp,
+  }) async {
+    final response = await _authApi.verifyEmailOtp(email, otp);
+    final root = Map<String, dynamic>.from(response.data as Map);
+    if (root['success'] != true) {
+      throw StateError(
+        root['message']?.toString() ?? 'Invalid verification code',
+      );
+    }
+    return root['message']?.toString() ?? 'Email verified';
+  }
+
   Future<String> forgotPassword(String email) async {
     print('--- AuthRepo: Forgot Password for $email ---');
     try {
       Response response = await _authApi.forgotPassword(email);
       print('Response: ${response.data}');
-      return response.data['message'] ?? 'Check your email';
+      final root = Map<String, dynamic>.from(response.data as Map);
+      if (root['success'] != true) {
+        throw StateError(root['message']?.toString() ?? 'Request failed');
+      }
+      return root['message']?.toString() ?? 'Check your email';
     } catch (e) {
       print('Error: $e');
-      return e.toString();
+      rethrow;
     }
   }
 
@@ -95,10 +155,16 @@ class AuthRepo {
     try {
       Response response = await _authApi.resetPassword(data);
       print('Response: ${response.data}');
-      return response.data['message'] ?? 'Success';
+      final root = Map<String, dynamic>.from(response.data as Map);
+      if (root['success'] != true) {
+        throw StateError(
+          root['message']?.toString() ?? 'Password reset failed',
+        );
+      }
+      return root['message']?.toString() ?? 'Success';
     } catch (e) {
       print('Error: $e');
-      return e.toString();
+      rethrow;
     }
   }
 
@@ -119,11 +185,23 @@ class AuthRepo {
   Future<String> logout() async {
     print('--- AuthRepo: Logging out ---');
     try {
+      await PushNotificationService.instance.unregisterCurrentDevice();
       Response response = await _authApi.logout();
       await CacheHelper.removeData(key: 'token');
       return response.data['message'] ?? 'Logged out';
     } catch (e) {
       return e.toString();
     }
+  }
+
+  Future<String> logoutAll() async {
+    await PushNotificationService.instance.unregisterCurrentDevice();
+    final response = await _authApi.logoutAll();
+    final root = Map<String, dynamic>.from(response.data as Map);
+    if (root['success'] == false) {
+      throw StateError(root['message']?.toString() ?? 'Logout failed');
+    }
+    await CacheHelper.removeData(key: 'token');
+    return root['message']?.toString() ?? 'Logged out everywhere';
   }
 }

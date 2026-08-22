@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:work_key/shared/components/components.dart';
-import 'package:work_key/utils/constants.dart';
 
 class ForgotPasswordHeader extends StatelessWidget {
   const ForgotPasswordHeader({super.key});
@@ -20,9 +19,10 @@ class ForgotPasswordHeader extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         DefaultText(
-          text: "Enter your registered email address to receive a password reset code.",
+          text:
+              "Enter your registered email address to receive a password reset code.",
           style: TextStyle(
-            color: Colors.grey.shade600,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             fontSize: 15,
             height: 1.5,
           ),

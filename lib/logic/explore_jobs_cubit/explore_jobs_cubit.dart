@@ -11,7 +11,10 @@ class ExploreJobsCubit extends Cubit<ExploreJobsState> {
   Timer? _searchDebounce;
   ExploreJobsCubit(this.repo) : super(const ExploreJobsState());
 
-  Future<void> initialize({ExploreTab? initialTab}) async {
+  Future<void> initialize({
+    ExploreTab? initialTab,
+    Map<String, dynamic> initialFilters = const {},
+  }) async {
     final authenticated = CacheHelper.getData(key: 'token') != null;
     final language = CacheHelper.getData(key: 'LOCALE')?.toString() ?? 'en';
     final resolvedTab = initialTab == ExploreTab.forYou && !authenticated
@@ -32,7 +35,11 @@ class ExploreJobsCubit extends Cubit<ExploreJobsState> {
           defaults[filter.parameter!] = filter.defaultValue;
       }
       emit(
-        state.copyWith(schema: schema, schemaLoading: false, filters: defaults),
+        state.copyWith(
+          schema: schema,
+          schemaLoading: false,
+          filters: {...defaults, ...initialFilters},
+        ),
       );
     } catch (error) {
       emit(state.copyWith(schemaLoading: false, schemaError: error.toString()));

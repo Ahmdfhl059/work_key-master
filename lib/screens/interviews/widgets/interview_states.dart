@@ -26,9 +26,9 @@ class _InterviewSkeleton extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(17),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surfaceContainer,
       borderRadius: BorderRadius.circular(22),
-      border: Border.all(color: HomeColors.divider),
+      border: Border.all(color: context.appDivider),
     ),
     child: const Column(
       children: [
@@ -77,8 +77,8 @@ class InterviewsEmptyState extends StatelessWidget {
           Container(
             width: 86,
             height: 86,
-            decoration: const BoxDecoration(
-              color: HomeColors.softPurple,
+            decoration: BoxDecoration(
+              color: context.appSoftBrand,
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -90,8 +90,8 @@ class InterviewsEmptyState extends StatelessWidget {
           const SizedBox(height: 17),
           DefaultText(
             text: strings.emptyTitle,
-            style: const TextStyle(
-              color: HomeColors.ink,
+            style: TextStyle(
+              color: context.appInk,
               fontSize: 19,
               fontWeight: FontWeight.w900,
             ),
@@ -100,8 +100,8 @@ class InterviewsEmptyState extends StatelessWidget {
           DefaultText(
             text: strings.emptyBody,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: HomeColors.muted,
+            style: TextStyle(
+              color: context.appMuted,
               fontSize: 12.5,
               height: 1.5,
             ),
@@ -113,14 +113,9 @@ class InterviewsEmptyState extends StatelessWidget {
 }
 
 class InterviewsErrorState extends StatelessWidget {
-  final String message;
   final VoidCallback onRetry;
 
-  const InterviewsErrorState({
-    super.key,
-    required this.message,
-    required this.onRetry,
-  });
+  const InterviewsErrorState({super.key, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -136,20 +131,12 @@ class InterviewsErrorState extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           DefaultText(
-            text: message,
+            text: 'interviews.load_error',
             textAlign: TextAlign.center,
-            style: const TextStyle(color: HomeColors.muted, height: 1.45),
+            style: TextStyle(color: context.appMuted, height: 1.45),
           ),
           const SizedBox(height: 18),
-          DefaultButton(
-            width: 180,
-            background: HomeColors.purple,
-            text: strings.retry,
-            uppercase: false,
-            borderRadius: 14,
-            fontSize: 14,
-            onPress: onRetry,
-          ),
+          ModernRetryButton(text: strings.retry, onRetry: onRetry),
         ],
       ),
     );

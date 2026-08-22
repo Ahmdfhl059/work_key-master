@@ -110,7 +110,7 @@ class GuestHero extends StatelessWidget {
           borderRadius: BorderRadius.circular(wide ? 32 : 26),
           boxShadow: const [
             BoxShadow(
-              color: Color(0x292457C5),
+              color: Color(0x2918A949),
               blurRadius: 32,
               offset: Offset(0, 16),
             ),

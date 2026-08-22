@@ -1,3 +1,5 @@
+import '../../utils/media_url.dart';
+
 class ApplicationListResponse {
   final List<JobApplication> items;
   final ApplicationPaginationMeta meta;
@@ -80,17 +82,21 @@ class LocalizedValue {
   final String label;
   const LocalizedValue({required this.key, required this.label});
   factory LocalizedValue.fromDynamic(dynamic value) {
-    if (value is Map)
+    if (value is Map) {
       return LocalizedValue(
         key: '${value['key'] ?? ''}',
         label: '${value['value'] ?? value['label'] ?? value['key'] ?? ''}',
       );
+    }
     return LocalizedValue(key: '${value ?? ''}', label: '${value ?? ''}');
   }
 }
 
 class JobApplication {
   final int id;
+  final String coverLetter;
+  final bool consentToShareProfile;
+  final List<ApplicationScreeningAnswer> screeningAnswers;
   final LocalizedValue status;
   final bool requiresAction;
   final NextAction? nextAction;
@@ -105,6 +111,9 @@ class JobApplication {
 
   const JobApplication({
     required this.id,
+    this.coverLetter = '',
+    this.consentToShareProfile = false,
+    this.screeningAnswers = const [],
     required this.status,
     required this.requiresAction,
     required this.nextAction,
@@ -120,6 +129,20 @@ class JobApplication {
 
   factory JobApplication.fromMap(Map<String, dynamic> map) => JobApplication(
     id: _int(map['id'], -1),
+    coverLetter: '${map['cover_letter'] ?? ''}',
+    consentToShareProfile: map['consent_to_share_profile'] == true,
+    screeningAnswers:
+        (map['screening_answers'] is List
+                ? map['screening_answers'] as List
+                : const [])
+            .whereType<Map>()
+            .map(
+              (item) => ApplicationScreeningAnswer.fromMap(
+                Map<String, dynamic>.from(item),
+              ),
+            )
+            .where((item) => item.question.isNotEmpty)
+            .toList(),
     status: LocalizedValue.fromDynamic(map['status']),
     requiresAction: map['requires_action'] == true,
     nextAction: map['next_action'] is Map
@@ -170,6 +193,50 @@ class JobApplication {
         ? Map<String, dynamic>.from(map['latest_information_request'])
         : null,
   );
+}
+
+class ApplicationScreeningAnswer {
+  final String question;
+  final String type;
+  final bool required;
+  final String answer;
+
+  const ApplicationScreeningAnswer({
+    required this.question,
+    required this.type,
+    required this.required,
+    required this.answer,
+  });
+
+  factory ApplicationScreeningAnswer.fromMap(Map<String, dynamic> map) {
+    final rawAnswer = map['answer'];
+    final answerMap = rawAnswer is Map
+        ? Map<String, dynamic>.from(rawAnswer)
+        : <String, dynamic>{};
+    final options = answerMap['selected_options'] is List
+        ? (answerMap['selected_options'] as List)
+              .map(
+                (item) =>
+                    item is Map ? '${item['option_text'] ?? ''}' : '$item',
+              )
+              .where((item) => item.isNotEmpty)
+              .join(', ')
+        : '';
+    final value = answerMap['value'] ?? rawAnswer ?? map['value'];
+    return ApplicationScreeningAnswer(
+      question: '${map['question_text'] ?? map['question'] ?? ''}',
+      type: LocalizedValue.fromDynamic(map['question_type']).label,
+      required: map['is_required'] == true,
+      answer: options.isNotEmpty ? options : _answerLabel(value),
+    );
+  }
+
+  static String _answerLabel(dynamic value) {
+    if (value == true) return 'Yes';
+    if (value == false) return 'No';
+    if (value is List) return value.map((item) => '$item').join(', ');
+    return '${value ?? ''}';
+  }
 }
 
 class NextAction {
@@ -236,7 +303,14 @@ class CompanySummary {
   factory CompanySummary.fromMap(Map<String, dynamic> map) => CompanySummary(
     id: _int(map['id'], -1),
     name: '${map['name'] ?? ''}',
-    logoUrl: map['logo_url']?.toString() ?? map['logo']?.toString(),
+    logoUrl: resolveMediaUrl(
+      map['logo_url'] ??
+          map['logo'] ??
+          map['company_logo_url'] ??
+          map['logo_path'] ??
+          map['company_logo'] ??
+          (map['media'] is Map ? (map['media'] as Map)['logo'] : null),
+    ),
   );
 }
 

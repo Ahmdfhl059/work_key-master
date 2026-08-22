@@ -1,0 +1,17 @@
+{
+  "project_info": {
+    "project_number": "123137888347",
+    "project_id": "workey-syria",
+    "storage_bucket": "workey-syria.firebasestorage.app"
+  },
+  "client": [{
+    "client_info": {
+      "mobilesdk_app_id": "1:123137888347:android:96fbbd969807df24716f7e",
+      "android_client_info": { "package_name": "com.workey.mobile" }
+    },
+    "oauth_client": [],
+    "api_key": [{ "current_key": "AIzaSyDT0dt3JUL_J-r5nApV7aHTAVahOlPFVsU" }],
+    "services": { "appinvite_service": { "other_platform_oauth_client": [] } }
+  }],
+  "configuration_version": "1"
+}

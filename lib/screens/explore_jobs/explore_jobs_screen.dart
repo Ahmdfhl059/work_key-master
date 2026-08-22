@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:work_key/data/repo/explore_jobs_repo.dart';
 import 'package:work_key/logic/explore_jobs_cubit/explore_jobs_cubit.dart';
 import 'package:work_key/logic/explore_jobs_cubit/explore_jobs_state.dart';
+import 'package:work_key/localization/app_localizations.dart';
 import 'package:work_key/shared/components/components.dart';
 import 'package:work_key/utils/constants.dart';
 
@@ -13,21 +14,42 @@ import 'widgets/explore_states.dart';
 class ExploreJobsScreen extends StatelessWidget {
   final VoidCallback? onBack;
   final ExploreTab? initialTab;
+  final int? companyId;
+  final String? companyName;
 
-  const ExploreJobsScreen({super.key, this.onBack, this.initialTab});
+  const ExploreJobsScreen({
+    super.key,
+    this.onBack,
+    this.initialTab,
+    this.companyId,
+    this.companyName,
+  });
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-    create: (_) =>
-        ExploreJobsCubit(ExploreJobsRepo())..initialize(initialTab: initialTab),
-    child: _ExploreJobsView(onBack: onBack),
+    create: (_) => ExploreJobsCubit(ExploreJobsRepo())
+      ..initialize(
+        initialTab: companyId == null ? initialTab : ExploreTab.all,
+        initialFilters: {if (companyId != null) 'company_id': companyId},
+      ),
+    child: _ExploreJobsView(
+      onBack: onBack,
+      companyName: companyName,
+      companyMode: companyId != null,
+    ),
   );
 }
 
 class _ExploreJobsView extends StatefulWidget {
   final VoidCallback? onBack;
+  final String? companyName;
+  final bool companyMode;
 
-  const _ExploreJobsView({this.onBack});
+  const _ExploreJobsView({
+    this.onBack,
+    this.companyName,
+    this.companyMode = false,
+  });
   @override
   State<_ExploreJobsView> createState() => _ExploreJobsViewState();
 }
@@ -54,7 +76,7 @@ class _ExploreJobsViewState extends State<_ExploreJobsView> {
 
   @override
   Widget build(BuildContext context) => Material(
-    color: HomeColors.canvas,
+    color: Theme.of(context).scaffoldBackgroundColor,
     child: BlocBuilder<ExploreJobsCubit, ExploreJobsState>(
       builder: (context, state) {
         final cubit = context.read<ExploreJobsCubit>();
@@ -73,7 +95,29 @@ class _ExploreJobsViewState extends State<_ExploreJobsView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _ExploreTabs(state: state, onTap: cubit.selectTab),
+                        if (widget.companyMode) ...[
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: () => Navigator.pop(context),
+                                icon: const Icon(Icons.arrow_back_rounded),
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  widget.companyName ??
+                                      context.tr(
+                                        'explore.company_opportunities',
+                                      ),
+                                  style: Theme.of(context).textTheme.titleLarge
+                                      ?.copyWith(fontWeight: FontWeight.w900),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                        ] else
+                          _ExploreTabs(state: state, onTap: cubit.selectTab),
                         if (state.tab == ExploreTab.all) ...[
                           const SizedBox(height: 16),
                           Row(
@@ -84,7 +128,7 @@ class _ExploreJobsViewState extends State<_ExploreJobsView> {
                                   onChanged: cubit.search,
                                   textInputAction: TextInputAction.search,
                                   decoration: InputDecoration(
-                                    hintText: 'Search jobs or companies',
+                                    hintText: context.tr('explore.search_hint'),
                                     prefixIcon: const Icon(
                                       Icons.search_rounded,
                                     ),
@@ -101,15 +145,17 @@ class _ExploreJobsViewState extends State<_ExploreJobsView> {
                                             ),
                                           ),
                                     filled: true,
-                                    fillColor: Colors.white,
+                                    fillColor: Theme.of(
+                                      context,
+                                    ).colorScheme.surfaceContainer,
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
                                       borderSide: BorderSide.none,
                                     ),
                                     enabledBorder: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(16),
-                                      borderSide: const BorderSide(
-                                        color: HomeColors.divider,
+                                      borderSide: BorderSide(
+                                        color: context.appDivider,
                                       ),
                                     ),
                                   ),
@@ -145,8 +191,7 @@ class _ExploreJobsViewState extends State<_ExploreJobsView> {
                             Padding(
                               padding: const EdgeInsets.only(top: 8),
                               child: DefaultText(
-                                text:
-                                    'Filter options are currently unavailable.',
+                                text: 'explore.filters_unavailable',
                                 style: const TextStyle(
                                   color: HomeColors.warning,
                                   fontSize: 11.5,
@@ -168,7 +213,6 @@ class _ExploreJobsViewState extends State<_ExploreJobsView> {
               else if (state.error != null && state.visibleJobs.isEmpty)
                 SliverToBoxAdapter(
                   child: ExploreErrorState(
-                    message: state.error!,
                     onRetry: () => cubit.load(refresh: true),
                   ),
                 )
@@ -218,15 +262,17 @@ class _ExploreTabs extends StatelessWidget {
       ExploreTab.all,
     ];
     String label(ExploreTab tab) => tab == ExploreTab.forYou
-        ? 'For You'
+        ? context.tr('explore.tab_for_you')
         : tab == ExploreTab.latest
-        ? 'Latest'
-        : 'All Jobs';
+        ? context.tr('explore.tab_latest')
+        : context.tr('explore.tab_all');
+    final colors = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
-        color: HomeColors.softPurple,
+        color: colors.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: colors.outlineVariant),
       ),
       child: Row(
         children: tabs.map((tab) {
@@ -239,11 +285,15 @@ class _ExploreTabs extends StatelessWidget {
                 duration: const Duration(milliseconds: 180),
                 padding: const EdgeInsets.symmetric(vertical: 11),
                 decoration: BoxDecoration(
-                  color: selected ? Colors.white : Colors.transparent,
+                  color: selected ? colors.primary : Colors.transparent,
                   borderRadius: BorderRadius.circular(11),
                   boxShadow: selected
-                      ? const [
-                          BoxShadow(color: Color(0x126554D9), blurRadius: 12),
+                      ? [
+                          BoxShadow(
+                            color: colors.primary.withValues(alpha: .24),
+                            blurRadius: 14,
+                            offset: const Offset(0, 5),
+                          ),
                         ]
                       : null,
                 ),
@@ -251,7 +301,9 @@ class _ExploreTabs extends StatelessWidget {
                   child: DefaultText(
                     text: label(tab),
                     style: TextStyle(
-                      color: selected ? HomeColors.purple : HomeColors.muted,
+                      color: selected
+                          ? colors.onPrimary
+                          : colors.onSurfaceVariant,
                       fontSize: 12.5,
                       fontWeight: FontWeight.w700,
                     ),

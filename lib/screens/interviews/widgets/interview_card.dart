@@ -25,24 +25,33 @@ class InterviewCard extends StatelessWidget {
     return Semantics(
       button: true,
       label: '${interview.type.label}, ${interview.jobTitle}',
-      child: InkWell(
+      child: AnimatedPressableCard(
         onTap: onTap,
         borderRadius: BorderRadius.circular(22),
         child: Container(
           padding: const EdgeInsets.all(17),
           decoration: BoxDecoration(
-            color: Colors.white,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Theme.of(context).colorScheme.surfaceContainer,
+                theme.background.withValues(alpha: .30),
+              ],
+            ),
             borderRadius: BorderRadius.circular(22),
             border: Border.all(
               color: interview.needsConfirmation
                   ? HomeColors.purple.withValues(alpha: .32)
-                  : HomeColors.divider,
+                  : context.appDivider,
             ),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
-                color: Color(0x0B15213A),
-                blurRadius: 18,
-                offset: Offset(0, 8),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: .10),
+                blurRadius: 24,
+                offset: const Offset(0, 10),
               ),
             ],
           ),
@@ -65,8 +74,8 @@ class InterviewCard extends StatelessWidget {
                           text: interview.jobTitle,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: HomeColors.ink,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontSize: 16,
                             height: 1.3,
                             fontWeight: FontWeight.w900,
@@ -77,8 +86,10 @@ class InterviewCard extends StatelessWidget {
                           text: interview.companyName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: HomeColors.muted,
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -103,8 +114,8 @@ class InterviewCard extends StatelessWidget {
                     vertical: 11,
                   ),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [HomeColors.softPurple, Color(0xFFF7F6FF)],
+                    gradient: LinearGradient(
+                      colors: [context.appSoftBrand, Color(0xFFF7F6FF)],
                     ),
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -119,8 +130,8 @@ class InterviewCard extends StatelessWidget {
                       Expanded(
                         child: DefaultText(
                           text: DateFormat('EEE, MMM d • h:mm a').format(date),
-                          style: const TextStyle(
-                            color: HomeColors.ink,
+                          style: TextStyle(
+                            color: context.appInk,
                             fontSize: 12.5,
                             fontWeight: FontWeight.w800,
                           ),
@@ -129,8 +140,8 @@ class InterviewCard extends StatelessWidget {
                       if (interview.durationMinutes > 0)
                         DefaultText(
                           text: strings.minutes(interview.durationMinutes),
-                          style: const TextStyle(
-                            color: HomeColors.muted,
+                          style: TextStyle(
+                            color: context.appMuted,
                             fontSize: 10.5,
                           ),
                         ),
@@ -188,7 +199,7 @@ class _CompanyLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) => CircleAvatar(
     radius: 26,
-    backgroundColor: HomeColors.softPurple,
+    backgroundColor: context.appSoftBrand,
     foregroundImage: url?.isNotEmpty == true ? NetworkImage(url!) : null,
     onForegroundImageError: url?.isNotEmpty == true ? (_, __) {} : null,
     child: url?.isNotEmpty == true
@@ -240,20 +251,20 @@ class _InfoChip extends StatelessWidget {
     constraints: const BoxConstraints(maxWidth: 150),
     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
     decoration: BoxDecoration(
-      color: HomeColors.canvas,
+      color: context.appCanvas,
       borderRadius: BorderRadius.circular(9),
     ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, color: HomeColors.muted, size: 13),
+        Icon(icon, color: context.appMuted, size: 13),
         const SizedBox(width: 4),
         Flexible(
           child: DefaultText(
             text: label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: HomeColors.muted, fontSize: 9.5),
+            style: TextStyle(color: context.appMuted, fontSize: 9.5),
           ),
         ),
       ],

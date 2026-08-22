@@ -10,41 +10,53 @@ class JobCubit extends Cubit<JobStates> {
 
   void getJobs({Map<String, dynamic>? query}) {
     emit(JobLoadingState());
-    jobsRepo.getJobs(query: query).then((jobs) {
-      emit(GetJobsSuccessState(jobs));
-    }).catchError((error) {
-      emit(JobErrorState(error.toString()));
-    });
+    jobsRepo
+        .getJobs(query: query)
+        .then((jobs) {
+          emit(GetJobsSuccessState(jobs));
+        })
+        .catchError((error) {
+          emit(JobErrorState(error.toString()));
+        });
   }
 
   void getMyJobs() {
     emit(JobLoadingState());
-    jobsRepo.getMyJobs().then((jobs) {
-      emit(GetJobsSuccessState(jobs));
-    }).catchError((error) {
-      emit(JobErrorState(error.toString()));
-    });
+    jobsRepo
+        .getMyJobs()
+        .then((jobs) {
+          emit(GetJobsSuccessState(jobs));
+        })
+        .catchError((error) {
+          emit(JobErrorState(error.toString()));
+        });
   }
 
   void getJobDetails(int id) {
     emit(JobLoadingState());
-    jobsRepo.getJobDetails(id).then((job) {
-      if (job.id != -1) {
-        emit(GetJobDetailsSuccessState(job));
-      } else {
-        emit(JobErrorState(job.message ?? 'Failed to get job details'));
-      }
-    }).catchError((error) {
-      emit(JobErrorState(error.toString()));
-    });
+    jobsRepo
+        .getJobDetails(id)
+        .then((job) {
+          if (job.id != -1) {
+            emit(GetJobDetailsSuccessState(job));
+          } else {
+            emit(JobErrorState(job.message ?? 'Failed to get job details'));
+          }
+        })
+        .catchError((error) {
+          emit(JobErrorState(error.toString()));
+        });
   }
 
   void getRecommendedJobs() {
     emit(JobLoadingState());
-    jobsRepo.getRecommendedJobs().then((jobs) {
-      emit(GetJobsSuccessState(jobs));
-    }).catchError((error) {
-      emit(JobErrorState(error.toString()));
-    });
+    jobsRepo
+        .getRecommendedJobs()
+        .then((jobs) {
+          emit(GetJobsSuccessState(jobs));
+        })
+        .catchError((error) {
+          emit(JobErrorState(error.toString()));
+        });
   }
 }

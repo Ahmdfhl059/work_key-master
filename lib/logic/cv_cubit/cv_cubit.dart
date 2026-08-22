@@ -1,124 +1,169 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../data/repo/cv_repo.dart';
 import 'cv_state.dart';
-import 'package:dio/dio.dart';
 
-class CvCubit extends Cubit<CvStates> {
+class CvCubit extends Cubit<CvState> {
   final CvRepo cvRepo;
-  CvCubit(this.cvRepo) : super(CvInitialState());
 
-  static CvCubit get(context) => BlocProvider.of(context);
+  CvCubit(this.cvRepo) : super(const CvState());
 
-  // 1. جلب كافة ملفات الـ CV
-  void getCvFiles() {
-    print('--- 📄 CvCubit: Fetching CV Files ---');
-    emit(CvLoadingState());
-    cvRepo.getCvFiles().then((list) {
-      emit(GetCvFilesSuccessState(list));
-    }).catchError((error) {
-      emit(CvErrorState(error.toString()));
-    });
+  static CvCubit get(dynamic context) => BlocProvider.of<CvCubit>(context);
+
+  Future<void> getCvFiles({bool showLoading = true}) async {
+    if (showLoading) {
+      emit(
+        state.copyWith(
+          loading: true,
+          clearError: true,
+          clearMessage: true,
+          profileChanged: false,
+        ),
+      );
+    }
+    try {
+      final files = await cvRepo.getCvFiles();
+      emit(
+        state.copyWith(
+          files: files,
+          loading: false,
+          clearBusyFile: true,
+          clearError: true,
+        ),
+      );
+    } catch (_) {
+      emit(
+        state.copyWith(
+          loading: false,
+          clearBusyFile: true,
+          error: 'We could not load your CV. Please try again.',
+        ),
+      );
+    }
   }
 
-  // 2. رفع ملف CV جديد (PDF/Word)
-  void uploadCv(FormData formData) {
-    print('--- 📄 CvCubit: Uploading CV ---');
-    emit(CvLoadingState());
-    cvRepo.uploadCv(formData).then((model) {
-      if (model.id != -1) {
-        emit(UploadCvSuccessState(model));
-        getCvFiles(); // تحديث القائمة
-      } else {
-        emit(CvErrorState(model.message ?? 'Upload failed'));
-      }
-    });
+  Future<void> uploadCv(FormData formData) async {
+    emit(
+      state.copyWith(
+        loading: true,
+        clearError: true,
+        clearMessage: true,
+        profileChanged: false,
+      ),
+    );
+    try {
+      final uploaded = await cvRepo.uploadCv(formData);
+      final merged = [
+        uploaded,
+        ...state.files.where((file) => file.id != uploaded.id),
+      ];
+      emit(
+        state.copyWith(
+          files: merged,
+          loading: false,
+          message: 'CV uploaded. Review and confirm it to update your profile.',
+        ),
+      );
+      await getCvFiles(showLoading: false);
+    } catch (_) {
+      emit(
+        state.copyWith(
+          loading: false,
+          error: 'CV upload failed. Please check the file and try again.',
+        ),
+      );
+    }
   }
 
-  // 3. جلب المسودة المستخرجة من الـ AI
-  void getParsedData(int id) {
-    print('--- 📄 CvCubit: Fetching Draft for CV: $id ---');
-    emit(CvLoadingState());
-    cvRepo.getParsedCv(id).then((data) {
-      if (data.isNotEmpty) {
-        emit(GetParsedDataSuccessState(data));
-      } else {
-        emit(CvErrorState("AI Draft is not ready yet. Please refresh."));
-      }
-    });
+  Future<Map<String, dynamic>> getReview(int id) => cvRepo.getCvReview(id);
+
+  Future<Map<String, dynamic>> getParsedData(int id) => cvRepo.getParsedCv(id);
+
+  Future<void> generateSuggestions(int id) async {
+    emit(state.copyWith(busyFileId: id, clearError: true));
+    try {
+      await cvRepo.generateSuggestions(id);
+      await getCvFiles(showLoading: false);
+    } catch (_) {
+      emit(
+        state.copyWith(
+          clearBusyFile: true,
+          error: 'We could not prepare the CV differences.',
+        ),
+      );
+    }
   }
 
-  // 4. تعديل المسودة يدوياً (طلبك: "انا فيني اعدل عليها")
-  void updateDraftData(int id, Map<String, dynamic> updatedData) {
-    print('--- 📄 CvCubit: Updating Draft Data for CV: $id ---');
-    emit(CvLoadingState());
-    cvRepo.updateDraft(id, updatedData).then((message) {
-      getParsedData(id); // إعادة جلب البيانات لرؤية التحديثات
-    });
+  Future<Map<String, dynamic>> acceptSuggestion(
+    int suggestionId,
+    Map<String, dynamic>? editedValue,
+  ) async {
+    final suggestion = await cvRepo.acceptSuggestion(suggestionId, editedValue);
+    emit(
+      state.copyWith(
+        profileChanged: false,
+        message: 'CV decision saved.',
+        clearError: true,
+      ),
+    );
+    return suggestion;
   }
 
-  // 5. تأكيد المراجعة وبدء المقارنة (Suggestions)
-  void confirmReview(int id) {
-    print('--- 📄 CvCubit: Confirming Draft Review: $id ---');
-    emit(CvLoadingState());
-    cvRepo.confirmCvReview(id).then((message) {
-      generateSuggestions(id); // توليد الاقتراحات فور التأكيد
-    });
+  Future<Map<String, dynamic>> rejectSuggestion(
+    int suggestionId,
+    String reason,
+  ) => cvRepo.rejectSuggestion(suggestionId, reason);
+
+  Future<Map<String, dynamic>> decideBulkSuggestions(
+    int cvFileId,
+    List<int> ids,
+    String decision,
+  ) => cvRepo.decideBulkSuggestions(cvFileId, ids, decision);
+
+  Future<Map<String, dynamic>?> confirmReview(int id) async {
+    emit(state.copyWith(busyFileId: id, clearError: true));
+    try {
+      final confirmation = await cvRepo.confirmCvReview(id);
+      await getCvFiles(showLoading: false);
+      emit(
+        state.copyWith(
+          clearBusyFile: true,
+          clearError: true,
+          message: 'CV confirmed and your profile was updated.',
+          profileChanged: true,
+        ),
+      );
+      return confirmation;
+    } catch (_) {
+      emit(
+        state.copyWith(
+          clearBusyFile: true,
+          error: 'CV confirmation failed. Complete the required review first.',
+        ),
+      );
+      return null;
+    }
   }
 
-  // 6. توليد اقتراحات المزامنة (Comparison)
-  void generateSuggestions(int id) {
-    print('--- 📄 CvCubit: Generating AI Suggestions ---');
-    cvRepo.generateSuggestions(id).then((message) {
-      emit(CvActionSuccessState(message));
-    });
+  Future<void> cancelCv(int id) async {
+    emit(state.copyWith(busyFileId: id, clearError: true));
+    try {
+      await cvRepo.cancelCv(id);
+      emit(
+        state.copyWith(
+          files: state.files.where((file) => file.id != id).toList(),
+          clearBusyFile: true,
+          message: 'cv.delete_success',
+        ),
+      );
+      await getCvFiles(showLoading: false);
+    } catch (_) {
+      emit(state.copyWith(clearBusyFile: true, error: 'cv.delete_error'));
+    }
   }
 
-  // 7. جلب قائمة الاقتراحات (ADD/UPDATE/MERGE)
-  void getSuggestions(int cvId) {
-    emit(CvLoadingState());
-    cvRepo.getCvSuggestions(cvId).then((list) {
-      emit(GetSuggestionsSuccessState(list));
-    });
-  }
-
-  // 8. قبول اقتراح محدد
-  void acceptSuggestion(int suggestionId, Map<String, dynamic>? editedValue) {
-    print('--- 📄 CvCubit: Accepting Suggestion: $suggestionId ---');
-    cvRepo.acceptSuggestion(suggestionId, editedValue).then((message) {
-      emit(CvActionSuccessState(message));
-    });
-  }
-
-  // 9. رفض/تجاهل اقتراح
-  void rejectSuggestion(int suggestionId, String reason) {
-    cvRepo.rejectSuggestion(suggestionId, reason).then((message) {
-      emit(CvActionSuccessState(message));
-    });
-  }
-
-  // 10. المزامنة النهائية (تحديث البروفايل الحقيقي)
-  void applyBulk(List<int> ids) {
-    emit(CvLoadingState());
-    cvRepo.applyBulkSuggestions(ids).then((message) {
-      emit(CvActionSuccessState(message));
-    });
-  }
-
-  // 11. تعيين ملف أساسي
-  void makePrimary(int id) {
-    emit(CvLoadingState());
-    cvRepo.makePrimary(id).then((message) {
-      emit(CvActionSuccessState(message));
-      getCvFiles();
-    });
-  }
-
-  // 12. حذف ملف
-  void deleteCv(int id) {
-    emit(CvLoadingState());
-    cvRepo.deleteCv(id).then((message) {
-      emit(CvActionSuccessState(message));
-      getCvFiles();
-    });
-  }
+  void consumeFeedback() => emit(
+    state.copyWith(clearError: true, clearMessage: true, profileChanged: false),
+  );
 }

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/models/interview_model.dart';
 import '../../data/repo/interviews_repo.dart';
+import '../../localization/app_localizations.dart';
 import '../../shared/components/components.dart';
 import '../../utils/constants.dart';
 import 'interview_strings.dart';
 import 'interview_theme.dart';
+import 'interview_video_screen.dart';
 
 class InterviewDetailsScreen extends StatefulWidget {
   final int interviewId;
@@ -29,6 +30,7 @@ class _InterviewDetailsScreenState extends State<InterviewDetailsScreen> {
   String? _error;
   bool _loading = false;
   bool _confirming = false;
+  bool _joining = false;
 
   @override
   void initState() {
@@ -58,9 +60,9 @@ class _InterviewDetailsScreenState extends State<InterviewDetailsScreen> {
   Widget build(BuildContext context) {
     final strings = InterviewStrings.of(context);
     return Scaffold(
-      backgroundColor: HomeColors.canvas,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: HomeColors.canvas,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           onPressed: () => Navigator.pop(context, _interview),
@@ -68,8 +70,8 @@ class _InterviewDetailsScreenState extends State<InterviewDetailsScreen> {
         ),
         title: DefaultText(
           text: strings.detailsTitle,
-          style: const TextStyle(
-            color: HomeColors.ink,
+          style: TextStyle(
+            color: context.appInk,
             fontSize: 19,
             fontWeight: FontWeight.w900,
           ),
@@ -78,12 +80,13 @@ class _InterviewDetailsScreenState extends State<InterviewDetailsScreen> {
       body: _loading
           ? const _DetailsLoading()
           : _error != null || _interview == null
-          ? _DetailsError(message: _error ?? '', onRetry: _load)
+          ? _DetailsError(onRetry: _load)
           : _DetailsContent(
               interview: _interview!,
               confirming: _confirming,
+              joining: _joining,
               onConfirm: _confirm,
-              onJoin: _openMeeting,
+              onJoin: _joinInterview,
             ),
     );
   }
@@ -131,25 +134,39 @@ class _InterviewDetailsScreenState extends State<InterviewDetailsScreen> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Attendance could not be confirmed.')),
+        SnackBar(
+          content: Text(context.tr('Attendance could not be confirmed.')),
+        ),
       );
     } finally {
       if (mounted) setState(() => _confirming = false);
     }
   }
 
-  Future<void> _openMeeting() async {
-    final raw = _interview?.meetingLink;
-    final uri = raw == null ? null : Uri.tryParse(raw);
-    if (uri == null ||
-        !await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('The meeting link could not be opened.'),
+  Future<void> _joinInterview() async {
+    final interview = _interview;
+    if (_joining || interview == null) return;
+    setState(() => _joining = true);
+    try {
+      final session = await _repo.createVideoSession(interview.id);
+      if (!mounted) return;
+      await navigateTo(
+        context,
+        InterviewVideoScreen(session: session, title: interview.jobTitle),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.tr(
+              'The in-app video room is not available yet. It opens near the interview time.',
+            ),
           ),
-        );
-      }
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _joining = false);
     }
   }
 }
@@ -157,12 +174,14 @@ class _InterviewDetailsScreenState extends State<InterviewDetailsScreen> {
 class _DetailsContent extends StatelessWidget {
   final InterviewModel interview;
   final bool confirming;
+  final bool joining;
   final VoidCallback onConfirm;
   final VoidCallback onJoin;
 
   const _DetailsContent({
     required this.interview,
     required this.confirming,
+    required this.joining,
     required this.onConfirm,
     required this.onJoin,
   });
@@ -225,7 +244,7 @@ class _DetailsContent extends StatelessWidget {
             const SizedBox(height: 16),
             _MessageCard(
               icon: Icons.mark_email_read_outlined,
-              title: 'Message from the company',
+              title: context.tr('interviews.company_message'),
               message: interview.candidateMessage!,
               color: HomeColors.purple,
             ),
@@ -234,7 +253,7 @@ class _DetailsContent extends StatelessWidget {
             const SizedBox(height: 16),
             _MessageCard(
               icon: Icons.event_busy_outlined,
-              title: 'Cancellation update',
+              title: context.tr('interviews.cancellation_update'),
               message: interview.cancellationMessage!,
               color: const Color(0xFFAA4545),
             ),
@@ -243,7 +262,9 @@ class _DetailsContent extends StatelessWidget {
           if (interview.needsConfirmation)
             DefaultButton(
               background: HomeColors.purple,
-              text: confirming ? 'Confirming...' : strings.confirm,
+              text: confirming
+                  ? context.tr('interviews.confirming')
+                  : strings.confirm,
               uppercase: false,
               height: 54,
               borderRadius: 16,
@@ -253,7 +274,7 @@ class _DetailsContent extends StatelessWidget {
           if (interview.canOpenMeeting) ...[
             if (interview.needsConfirmation) const SizedBox(height: 10),
             OutlinedButton.icon(
-              onPressed: onJoin,
+              onPressed: joining ? null : onJoin,
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(54),
                 foregroundColor: HomeColors.purple,
@@ -262,8 +283,14 @@ class _DetailsContent extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
-              icon: const Icon(Icons.video_call_rounded),
-              label: Text(strings.join),
+              icon: Icon(
+                interview.canJoinEmbeddedVideo
+                    ? Icons.video_call_rounded
+                    : Icons.open_in_new_rounded,
+              ),
+              label: Text(
+                joining ? context.tr('interviews.opening_room') : strings.join,
+              ),
             ),
           ],
         ],
@@ -284,12 +311,12 @@ class _DetailsHero extends StatelessWidget {
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [Color(0xFF5745CC), Color(0xFF8571E8)],
+        colors: [Color(0xFF29B148), Color(0xFF0FA348)],
       ),
       borderRadius: BorderRadius.circular(27),
       boxShadow: const [
         BoxShadow(
-          color: Color(0x2A6554D9),
+          color: Color(0x2A18A949),
           blurRadius: 28,
           offset: Offset(0, 13),
         ),
@@ -332,7 +359,7 @@ class _DetailsHero extends StatelessWidget {
                   DefaultText(
                     text: interview.companyName,
                     style: const TextStyle(
-                      color: Color(0xFFE9E4FF),
+                      color: Color(0xFFE8F7ED),
                       fontSize: 12.5,
                     ),
                   ),
@@ -403,9 +430,14 @@ class _ScheduleCard extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(18),
     decoration: BoxDecoration(
-      color: Colors.white,
+      gradient: LinearGradient(
+        colors: [
+          Theme.of(context).colorScheme.surfaceContainer,
+          Theme.of(context).colorScheme.primaryContainer.withValues(alpha: .24),
+        ],
+      ),
       borderRadius: BorderRadius.circular(21),
-      border: Border.all(color: HomeColors.divider),
+      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
     ),
     child: Row(
       children: [
@@ -413,7 +445,7 @@ class _ScheduleCard extends StatelessWidget {
           width: 58,
           height: 63,
           decoration: BoxDecoration(
-            color: HomeColors.softPurple,
+            color: context.appSoftBrand,
             borderRadius: BorderRadius.circular(17),
           ),
           child: Column(
@@ -421,7 +453,7 @@ class _ScheduleCard extends StatelessWidget {
             children: [
               Text(
                 DateFormat('d').format(start),
-                style: const TextStyle(
+                style: TextStyle(
                   color: HomeColors.purple,
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
@@ -429,7 +461,7 @@ class _ScheduleCard extends StatelessWidget {
               ),
               Text(
                 DateFormat('MMM').format(start).toUpperCase(),
-                style: const TextStyle(
+                style: TextStyle(
                   color: HomeColors.purple,
                   fontSize: 9,
                   fontWeight: FontWeight.w800,
@@ -445,8 +477,8 @@ class _ScheduleCard extends StatelessWidget {
             children: [
               DefaultText(
                 text: DateFormat('EEEE, MMMM d').format(start),
-                style: const TextStyle(
-                  color: HomeColors.ink,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 15,
                   fontWeight: FontWeight.w900,
                 ),
@@ -456,8 +488,8 @@ class _ScheduleCard extends StatelessWidget {
                 text: end == null
                     ? DateFormat('h:mm a').format(start)
                     : '${DateFormat('h:mm a').format(start)} — ${DateFormat('h:mm a').format(end!)}',
-                style: const TextStyle(
-                  color: HomeColors.muted,
+                style: TextStyle(
+                  color: context.appMuted,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
@@ -485,9 +517,9 @@ class _DetailsSection extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(18),
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surfaceContainer,
       borderRadius: BorderRadius.circular(21),
-      border: Border.all(color: HomeColors.divider),
+      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -498,8 +530,8 @@ class _DetailsSection extends StatelessWidget {
             const SizedBox(width: 8),
             DefaultText(
               text: title,
-              style: const TextStyle(
-                color: HomeColors.ink,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 15,
                 fontWeight: FontWeight.w900,
               ),
@@ -533,7 +565,7 @@ class _DetailRow extends StatelessWidget {
           width: 34,
           height: 34,
           decoration: BoxDecoration(
-            color: HomeColors.softPurple,
+            color: context.appSoftBrand,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, size: 17, color: HomeColors.purple),
@@ -545,13 +577,13 @@ class _DetailRow extends StatelessWidget {
             children: [
               DefaultText(
                 text: label,
-                style: const TextStyle(color: HomeColors.muted, fontSize: 10),
+                style: TextStyle(color: context.appMuted, fontSize: 10),
               ),
               const SizedBox(height: 3),
               DefaultText(
                 text: value,
-                style: const TextStyle(
-                  color: HomeColors.ink,
+                style: TextStyle(
+                  color: context.appInk,
                   fontSize: 12.5,
                   height: 1.4,
                   fontWeight: FontWeight.w700,
@@ -605,8 +637,8 @@ class _MessageCard extends StatelessWidget {
               const SizedBox(height: 5),
               DefaultText(
                 text: message,
-                style: const TextStyle(
-                  color: HomeColors.muted,
+                style: TextStyle(
+                  color: context.appMuted,
                   fontSize: 12,
                   height: 1.5,
                 ),
@@ -640,9 +672,8 @@ class _DetailsLoading extends StatelessWidget {
 }
 
 class _DetailsError extends StatelessWidget {
-  final String message;
   final VoidCallback onRetry;
-  const _DetailsError({required this.message, required this.onRetry});
+  const _DetailsError({required this.onRetry});
 
   @override
   Widget build(BuildContext context) => Center(
@@ -658,20 +689,12 @@ class _DetailsError extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           DefaultText(
-            text: message,
+            text: 'interviews.details_load_error',
             textAlign: TextAlign.center,
-            style: const TextStyle(color: HomeColors.muted),
+            style: TextStyle(color: context.appMuted),
           ),
           const SizedBox(height: 18),
-          DefaultButton(
-            width: 180,
-            background: HomeColors.purple,
-            text: 'Try again',
-            uppercase: false,
-            borderRadius: 14,
-            fontSize: 14,
-            onPress: onRetry,
-          ),
+          ModernRetryButton(onRetry: onRetry),
         ],
       ),
     ),

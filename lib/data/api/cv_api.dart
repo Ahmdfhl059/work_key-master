@@ -18,21 +18,16 @@ class CvApi {
     return await RemoteApi.get('cv/$id/parsed');
   }
 
-  // تحديث المسودة يدوياً (تعديل بيانات الـ AI)
-  Future<Response> updateCvDraft(int id, Map<String, dynamic> data) async {
-    return await RemoteApi.put('cv/$id/review', body: data);
+  Future<Response> getCvReview(int id) async {
+    return await RemoteApi.get('cv/$id/review');
   }
 
   Future<Response> confirmCvReview(int id) async {
     return await RemoteApi.post('cv/$id/confirm');
   }
 
-  Future<Response> makeCvPrimary(int id) async {
-    return await RemoteApi.post('cv/$id/make-primary');
-  }
-
-  Future<Response> deleteCv(int id) async {
-    return await RemoteApi.delete('cv/$id');
+  Future<Response> cancelCv(int id) async {
+    return await RemoteApi.post('cv/$id/cancel');
   }
 
   // --- Profile Suggestions ---
@@ -44,21 +39,42 @@ class CvApi {
     return await RemoteApi.post('cv/$cvFileId/suggestions/generate');
   }
 
-  Future<Response> acceptSuggestion(int suggestionId, Map<String, dynamic>? editedValue) async {
-    return await RemoteApi.post('profile/suggestions/$suggestionId/accept', body: {
-      'edited_value': editedValue,
-    });
+  Future<Response> decideBulkSuggestions(
+    int cvFileId,
+    List<int> suggestionIds,
+    String decision,
+  ) async {
+    return await RemoteApi.post(
+      'cv/$cvFileId/suggestions/decisions',
+      body: {'suggestion_ids': suggestionIds, 'decision': decision},
+    );
+  }
+
+  Future<Response> acceptSuggestion(
+    int suggestionId,
+    Map<String, dynamic>? editedValue,
+  ) async {
+    return await RemoteApi.post(
+      'profile/suggestions/$suggestionId/accept',
+      body: buildAcceptSuggestionBody(editedValue),
+    );
   }
 
   Future<Response> rejectSuggestion(int suggestionId, String reason) async {
-    return await RemoteApi.post('profile/suggestions/$suggestionId/reject', body: {
-      'reason': reason,
-    });
-  }
-
-  Future<Response> applyBulkSuggestions(List<int> ids) async {
-    return await RemoteApi.post('profile/suggestions/apply-bulk', body: {
-      'suggestion_ids': ids,
-    });
+    return await RemoteApi.post(
+      'profile/suggestions/$suggestionId/reject',
+      body: {'reason': reason},
+    );
   }
 }
+
+/// Builds the accept payload expected by `AcceptProfileSuggestionRequest`.
+///
+/// Omitting `edited_value` means "use the CV proposal unchanged". Sending an
+/// empty object instead marks the suggestion as a user edit and makes the
+/// backend replace structured values (such as an experience) with empty data.
+Map<String, dynamic> buildAcceptSuggestionBody(
+  Map<String, dynamic>? editedValue,
+) => editedValue == null || editedValue.isEmpty
+    ? <String, dynamic>{}
+    : <String, dynamic>{'edited_value': editedValue};

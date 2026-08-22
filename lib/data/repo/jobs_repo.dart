@@ -1,18 +1,22 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import '../api/jobs_api.dart';
 import '../models/job_model.dart';
+import '../../services/applied_jobs_store.dart';
 
 class JobsRepo {
-  final JobsApi _jobsApi = JobsApi();
+  final JobsApi _jobsApi;
+
+  JobsRepo({JobsApi? jobsApi}) : _jobsApi = jobsApi ?? JobsApi();
 
   Future<List<JobModel>> getJobs({Map<String, dynamic>? query}) async {
     print('--- 📂 JobsRepo: Fetching Jobs ---');
     try {
       Response response = await _jobsApi.getJobs(query: query);
       Map<String, dynamic> responseData = response.data;
-      
+
       print('--- 📂 JobsRepo: Raw Data Received ---');
-      
+
       if (responseData['success'] == true) {
         dynamic data = responseData['data'];
         List<dynamic> jobsList = [];
@@ -27,7 +31,9 @@ class JobsRepo {
         }
 
         print('Jobs Count: ${jobsList.length}');
-        return jobsList.map((e) => JobModel.fromMap(e)).toList();
+        final jobs = jobsList.map((e) => JobModel.fromMap(e)).toList();
+        _logCompanyMedia(jobs);
+        return jobs;
       }
       print('JobsRepo: Success is false or data is null');
       return [];
@@ -39,21 +45,29 @@ class JobsRepo {
 
   Future<JobModel> getJobDetails(int id) async {
     try {
-      Response response = await _jobsApi.getJobDetails(id);
-      Map<String, dynamic> responseData = response.data;
-      if (responseData['success'] == true) {
-        JobModel job = JobModel.fromMap(responseData['data']);
-        job.message = responseData['message'];
-        return job;
-      } else {
-        JobModel error = JobModel.initial();
-        error.message = responseData['message'];
-        return error;
+      await AppliedJobsStore.refresh();
+      final response = await _jobsApi.getJobDetails(id);
+      final responseData = response.data is Map
+          ? Map<String, dynamic>.from(response.data as Map)
+          : <String, dynamic>{};
+      final data = responseData['data'];
+      if (responseData['success'] != true || data is! Map || data.isEmpty) {
+        final empty = JobModel.initial();
+        empty.message = responseData['message']?.toString();
+        return empty;
       }
-    } catch (e) {
-      JobModel error = JobModel.initial();
-      error.message = e.toString();
-      return error;
+
+      final job = JobModel.fromMap(Map<String, dynamic>.from(data));
+      if (AppliedJobsStore.contains(job.id)) {
+        job.hasApplied = true;
+        job.canApply = false;
+      }
+      _logCompanyMedia([job]);
+      job.message = responseData['message']?.toString();
+      return job;
+    } on DioException catch (error) {
+      if (error.response?.statusCode == 404) return JobModel.initial();
+      rethrow;
     }
   }
 
@@ -82,6 +96,15 @@ class JobsRepo {
       return [];
     } catch (e) {
       return [];
+    }
+  }
+
+  void _logCompanyMedia(List<JobModel> jobs) {
+    if (!kDebugMode) return;
+    for (final job in jobs) {
+      debugPrint(
+        '[Company] name=${job.company.name} | website=${job.company.website.isEmpty ? 'null' : job.company.website} | logo_url=${job.company.logo.isEmpty ? 'null' : job.company.logo}',
+      );
     }
   }
 }
