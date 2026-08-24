@@ -106,10 +106,7 @@ class AuthRepo {
     }
   }
 
-  Future<String> resendAccountVerification({
-    required String email,
-    required String password,
-  }) async {
+  Future<String> resendAccountVerification({required String email}) async {
     final response = await _authApi.resendEmailOtp(email);
     final root = Map<String, dynamic>.from(response.data as Map);
     if (root['success'] != true) {

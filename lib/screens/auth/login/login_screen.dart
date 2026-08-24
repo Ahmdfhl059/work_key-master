@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:work_key/layout/layout.dart';
 import 'package:work_key/logic/auth_cubit/auth_cubit.dart';
 import 'package:work_key/logic/auth_cubit/auth_state.dart';
+import 'package:work_key/localization/app_localizations.dart';
 import 'package:work_key/shared/components/components.dart';
 import 'package:work_key/shared/components/app_snackbar.dart';
 import '../forgot_password/forgot_password_screen.dart';
@@ -38,8 +39,8 @@ class LoginScreen extends StatelessWidget {
           }
           AppSnackBar.success(
             context,
-            state.userModel.message ?? 'Login Successful',
-            title: 'Welcome back',
+            context.tr('auth.login_success_message'),
+            title: context.tr('auth.welcome_back'),
           );
           navigateAndFinish(context, const Layout());
         } else if (state is AuthErrorState) {
@@ -56,7 +57,11 @@ class LoginScreen extends StatelessWidget {
               ),
             );
           } else {
-            AppSnackBar.error(context, state.error, title: 'Login failed');
+            AppSnackBar.error(
+              context,
+              state.error,
+              title: context.tr('auth.login_failed'),
+            );
           }
         }
       },
@@ -77,13 +82,13 @@ class LoginScreen extends StatelessWidget {
                     const SizedBox(height: 40),
                     CustomTextField(
                       controller: emailController,
-                      label: "Email Address",
+                      label: context.tr('auth.email'),
                       hint: "abc@example.com",
                       icon: Icons.alternate_email_rounded,
                     ),
                     CustomTextField(
                       controller: passwordController,
-                      label: "Password",
+                      label: context.tr('auth.password'),
                       hint: "••••••••",
                       icon: Icons.lock_outline_rounded,
                       isPassword: true,
@@ -94,7 +99,7 @@ class LoginScreen extends StatelessWidget {
                         onPressed: () {
                           navigateTo(context, const ForgotPasswordScreen());
                         },
-                        text: "Forgot Password?",
+                        text: context.tr('auth.forgot_password'),
                         textStyle: TextStyle(
                           color: colors.primary,
                           fontWeight: FontWeight.bold,
@@ -106,14 +111,14 @@ class LoginScreen extends StatelessWidget {
                     state is AuthLoadingState
                         ? const Center(child: CircularProgressIndicator())
                         : CustomButton(
-                            text: "Login",
+                            text: context.tr('auth.login'),
                             onPressed: () {
                               if (emailController.text.trim().isEmpty ||
                                   passwordController.text.isEmpty) {
                                 AppSnackBar.warning(
                                   context,
-                                  'Please fill all fields',
-                                  title: 'Missing information',
+                                  context.tr('auth.fill_all_fields'),
+                                  title: context.tr('auth.missing_information'),
                                 );
                               } else {
                                 AuthCubit.get(context).login(
@@ -130,7 +135,7 @@ class LoginScreen extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 15),
                           child: DefaultText(
-                            text: "OR",
+                            text: context.tr('auth.or'),
                             style: TextStyle(
                               color: colors.onSurfaceVariant,
                               fontSize: 12,
@@ -147,14 +152,14 @@ class LoginScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         DefaultText(
-                          text: "New here? ",
+                          text: context.tr('auth.new_here'),
                           style: TextStyle(color: colors.onSurfaceVariant),
                         ),
                         DefaultTextButton(
                           onPressed: () {
                             navigateTo(context, const RegisterScreen());
                           },
-                          text: "Create Account",
+                          text: context.tr('auth.create_account'),
                           textStyle: TextStyle(
                             color: colors.primary,
                             fontWeight: FontWeight.w900,

@@ -52,8 +52,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           print('--- UI Success: Account Created ---');
           AppSnackBar.success(
             context,
-            state.userModel.message ?? 'Success',
-            title: 'Account created',
+            context.tr('auth.account_created_message'),
+            title: context.tr('auth.account_created'),
           );
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(
@@ -66,7 +66,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
           );
         } else if (state is AuthErrorState) {
           print('--- UI Error: Registration Failed: ${state.error} ---');
-          AppSnackBar.error(context, state.error, title: 'Registration failed');
+          AppSnackBar.error(
+            context,
+            state.error,
+            title: context.tr('auth.registration_failed'),
+          );
         }
       },
       builder: (context, state) {
@@ -88,14 +92,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                     CustomTextField(
                       controller: nameController,
-                      label: "Full Name",
-                      hint: "Ex. Jane Doe",
+                      label: context.tr('profile.full_name'),
+                      hint: context.tr('auth.full_name_hint'),
                       icon: Icons.person_outline_rounded,
                     ),
 
                     CustomTextField(
                       controller: emailController,
-                      label: "Email Address",
+                      label: context.tr('auth.email'),
                       hint: "abc@example.com",
                       icon: Icons.alternate_email_rounded,
                     ),
@@ -103,7 +107,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     CustomTextField(
                       controller: phoneController,
                       keyboardType: TextInputType.phone,
-                      label: "Phone Number",
+                      label: context.tr('profile.phone'),
                       hint: "+963 9xx xxx xxx",
                       icon: Icons.phone_android_rounded,
                     ),
@@ -147,7 +151,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         );
                       },
                     ),
-                    SizedBox(height: 16,),
+                    const SizedBox(height: 16),
                     CustomTextField(
                       controller: locationController,
                       label: context.tr('profile.location_details'),
@@ -157,7 +161,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                     CustomTextField(
                       controller: passwordController,
-                      label: "Password",
+                      label: context.tr('auth.password'),
                       hint: "••••••••",
                       icon: Icons.lock_outline_rounded,
                       isPassword: true,
@@ -165,7 +169,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                     CustomTextField(
                       controller: confirmPasswordController,
-                      label: "Confirm Password",
+                      label: context.tr('auth.confirm_password'),
                       hint: "••••••••",
                       icon: Icons.lock_outline_rounded,
                       isPassword: true,
@@ -176,7 +180,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     state is AuthLoadingState
                         ? const Center(child: CircularProgressIndicator())
                         : CustomButton(
-                            text: "Register",
+                            text: context.tr('auth.register'),
                             onPressed: () {
                               print(
                                 '--- UI Action: Register Button Pressed ---',
@@ -191,8 +195,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 );
                                 AppSnackBar.warning(
                                   context,
-                                  'Please fill in all fields',
-                                  title: 'Missing information',
+                                  context.tr('auth.fill_all_fields'),
+                                  title: context.tr('auth.missing_information'),
                                 );
                                 return;
                               }
@@ -205,8 +209,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 );
                                 AppSnackBar.warning(
                                   context,
-                                  'Passwords do not match',
-                                  title: 'Check your password',
+                                  context.tr('auth.passwords_mismatch'),
+                                  title: context.tr('auth.check_password'),
                                 );
                                 return;
                               }
@@ -233,7 +237,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 15),
                           child: DefaultText(
-                            text: "OR",
+                            text: context.tr('auth.or'),
                             style: TextStyle(
                               color: colors.onSurfaceVariant,
                               fontSize: 12,
@@ -250,14 +254,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         DefaultText(
-                          text: "Do you have an account?",
+                          text: context.tr('auth.have_account'),
                           style: TextStyle(color: colors.onSurfaceVariant),
                         ),
                         DefaultTextButton(
                           onPressed: () {
                             navigateTo(context, const LoginScreen());
                           },
-                          text: "Login",
+                          text: context.tr('auth.login'),
                           textStyle: TextStyle(
                             color: colors.primary,
                             fontWeight: FontWeight.w900,

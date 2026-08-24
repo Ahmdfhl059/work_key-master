@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:work_key/shared/components/components.dart';
+import 'package:work_key/localization/app_localizations.dart';
 
 class RegisterHeader extends StatelessWidget {
   const RegisterHeader({super.key});
@@ -11,7 +12,7 @@ class RegisterHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         DefaultText(
-          text: "Register",
+          text: context.tr('auth.register'),
           style: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.w900,
@@ -29,22 +30,11 @@ class RegisterHeader extends StatelessWidget {
             ),
             children: [
               TextSpan(
-                text: "Create an ",
+                text: context.tr('auth.register_subtitle'),
                 style: TextStyle(color: colors.onSurfaceVariant, fontSize: 16),
               ),
               TextSpan(
-                text: "account",
-                style: TextStyle(
-                  color: colors.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              TextSpan(
-                text: " to access all the professional features of ",
-                style: TextStyle(color: colors.onSurfaceVariant, fontSize: 16),
-              ),
-              TextSpan(
-                text: "WORKEY!",
+                text: ' Work Key',
                 style: TextStyle(
                   color: colors.onSurface,
                   fontWeight: FontWeight.w900,

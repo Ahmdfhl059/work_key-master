@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -79,6 +81,18 @@ class CvCubit extends Cubit<CvState> {
   Future<Map<String, dynamic>> getReview(int id) => cvRepo.getCvReview(id);
 
   Future<Map<String, dynamic>> getParsedData(int id) => cvRepo.getParsedCv(id);
+
+  Future<Uint8List?> downloadCv(int id) async {
+    emit(state.copyWith(busyFileId: id, clearError: true, clearMessage: true));
+    try {
+      final bytes = await cvRepo.downloadCv(id);
+      emit(state.copyWith(clearBusyFile: true, clearError: true));
+      return bytes;
+    } catch (_) {
+      emit(state.copyWith(clearBusyFile: true, error: 'cv.download_error'));
+      return null;
+    }
+  }
 
   Future<void> generateSuggestions(int id) async {
     emit(state.copyWith(busyFileId: id, clearError: true));

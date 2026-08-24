@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:work_key/shared/components/components.dart';
+import 'package:work_key/localization/app_localizations.dart';
 
 class ResendCodeSection extends StatelessWidget {
   final VoidCallback onResend;
@@ -12,12 +13,12 @@ class ResendCodeSection extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         DefaultText(
-          text: "Didn't receive the code? ",
+          text: context.tr('verification.did_not_receive'),
           style: TextStyle(color: colors.onSurfaceVariant, fontSize: 14),
         ),
         DefaultTextButton(
           onPressed: onResend,
-          text: "Resend",
+          text: context.tr('verification.resend'),
           textStyle: TextStyle(
             color: colors.primary,
             fontWeight: FontWeight.w900,

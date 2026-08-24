@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:work_key/shared/components/components.dart';
+import 'package:work_key/localization/app_localizations.dart';
 
 class ForgotPasswordHeader extends StatelessWidget {
   const ForgotPasswordHeader({super.key});
@@ -9,9 +10,9 @@ class ForgotPasswordHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const DefaultText(
-          text: "Forgot Password?",
-          style: TextStyle(
+        DefaultText(
+          text: context.tr('auth.forgot_password'),
+          style: const TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.w900,
             letterSpacing: -0.5,
@@ -19,8 +20,7 @@ class ForgotPasswordHeader extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         DefaultText(
-          text:
-              "Enter your registered email address to receive a password reset code.",
+          text: context.tr('auth.forgot_password_subtitle'),
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
             fontSize: 15,

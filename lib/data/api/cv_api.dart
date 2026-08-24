@@ -14,6 +14,10 @@ class CvApi {
     return await RemoteApi.get('cv/$id');
   }
 
+  Future<Response> downloadCv(int id) async {
+    return await RemoteApi.getBytes('cv/$id/download');
+  }
+
   Future<Response> getParsedCv(int id) async {
     return await RemoteApi.get('cv/$id/parsed');
   }

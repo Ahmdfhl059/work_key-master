@@ -71,13 +71,10 @@ class AuthCubit extends Cubit<AuthStates> {
         });
   }
 
-  void resendAccountVerification({
-    required String email,
-    required String password,
-  }) {
+  void resendAccountVerification({required String email}) {
     emit(AuthLoadingState());
     authRepo
-        .resendAccountVerification(email: email, password: password)
+        .resendAccountVerification(email: email)
         .then((message) => emit(AccountVerificationCodeSentState(message)))
         .catchError((error) => emit(AuthErrorState(error.toString())));
   }
@@ -94,7 +91,7 @@ class AuthCubit extends Cubit<AuthStates> {
       if (user.id != -1 && user.emailVerified) {
         emit(AuthSuccessState(user));
       } else {
-        emit(AuthErrorState(user.message ?? 'Email verification failed'));
+        emit(AuthErrorState(user.message ?? 'verification.verify_failed'));
       }
     } catch (error) {
       emit(AuthErrorState(error.toString()));

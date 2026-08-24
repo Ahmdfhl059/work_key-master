@@ -30,12 +30,42 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     appBar: AppBar(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       surfaceTintColor: Colors.transparent,
-      title: Text(context.tr('notifications.title')),
+      toolbarHeight: 70,
+      titleSpacing: 0,
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.notifications_active_outlined,
+              color: Theme.of(context).colorScheme.primary,
+              size: 21,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Flexible(
+            child: Text(
+              context.tr('notifications.title'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w900),
+            ),
+          ),
+        ],
+      ),
       actions: [
-        TextButton(
+        IconButton(
+          tooltip: context.tr('notifications.read_all'),
           onPressed: () => context.read<NotificationsCubit>().markAllAsRead(),
-          child: Text(context.tr('notifications.read_all')),
+          icon: const Icon(Icons.done_all_rounded),
         ),
+        const SizedBox(width: 6),
       ],
     ),
     body: BlocBuilder<NotificationsCubit, NotificationsStates>(

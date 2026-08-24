@@ -23,6 +23,7 @@ class RemoteApi {
     Map<String, String>? headers,
     Map<String, dynamic>? queryParameters,
     bool preserveDioError = false,
+    ResponseType? responseType,
   }) async {
     // تنظيف المسار لضمان عدم تكرار السلاش
     String cleanPath = url.startsWith('/') ? url.substring(1) : url;
@@ -68,7 +69,11 @@ class RemoteApi {
         cleanPath,
         data: body,
         queryParameters: queryParameters,
-        options: Options(method: method, headers: finalHeaders),
+        options: Options(
+          method: method,
+          headers: finalHeaders,
+          responseType: responseType,
+        ),
       );
 
       debugPrint('--- ✅ Success Response: ${response.statusCode} ---');
@@ -117,6 +122,20 @@ class RemoteApi {
       headers: headers,
       queryParameters: queryParameters,
       preserveDioError: preserveDioError,
+    );
+  }
+
+  static Future<Response> getBytes(
+    String url, {
+    Map<String, String>? headers,
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    return _makeRequest(
+      'GET',
+      url,
+      headers: headers,
+      queryParameters: queryParameters,
+      responseType: ResponseType.bytes,
     );
   }
 

@@ -63,7 +63,7 @@ void main() {
     );
     expect(
       tester
-          .widget<Text>(find.text('Login to discover your next opportunity'))
+          .widget<Text>(find.text('Sign in to discover your next opportunity.'))
           .style
           ?.color,
       colors.onSurfaceVariant,

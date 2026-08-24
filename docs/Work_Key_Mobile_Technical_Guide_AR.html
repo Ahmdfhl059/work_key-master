@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>دليل واجهات وتقنيات تطبيق Work Key Mobile</title>
+  <style>
+    @page { size: A4; margin: 14mm 13mm 17mm; }
+    * { box-sizing: border-box; }
+    :root {
+      --green: #0f9f43;
+      --green-dark: #087d68;
+      --green-soft: #e9f8ee;
+      --purple: #6357c9;
+      --amber: #e88c19;
+      --ink: #17242b;
+      --muted: #5f7079;
+      --line: #dce8e1;
+      --surface: #f4f7f6;
+      --white: #ffffff;
+      --navy: #091217;
+    }
+    html { background: #dfe7e3; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: white;
+      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+      font-size: 10.4pt;
+      line-height: 1.72;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    a { color: var(--green-dark); text-decoration: none; }
+    code {
+      direction: ltr;
+      unicode-bidi: embed;
+      display: inline-block;
+      padding: 1px 5px;
+      border-radius: 5px;
+      background: #eef3f1;
+      color: #33444c;
+      font-family: Consolas, monospace;
+      font-size: 8.6pt;
+    }
+    .cover {
+      min-height: 267mm;
+      margin: -14mm -13mm -17mm;
+      padding: 28mm 23mm 20mm;
+      color: white;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(93,226,127,.26), transparent 24%),
+        radial-gradient(circle at 88% 78%, rgba(99,87,201,.34), transparent 28%),
+        linear-gradient(145deg, #071116 0%, #0b2322 54%, #0d5d3b 100%);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      break-after: page;
+    }
+    .cover:before, .cover:after {
+      content: "";
+      position: absolute;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 50%;
+    }
+    .cover:before { width: 170mm; height: 170mm; left: -80mm; top: -72mm; }
+    .cover:after { width: 120mm; height: 120mm; right: -52mm; bottom: -42mm; }
+    .cover-logo {
+      width: 55mm;
+      height: 18mm;
+      object-fit: contain;
+      object-position: right center;
+      filter: drop-shadow(0 8px 20px rgba(0,0,0,.20));
+      background: rgba(255,255,255,.96);
+      border-radius: 14px;
+      padding: 8px 13px;
+    }
+    .cover-kicker {
+      display: inline-block;
+      width: fit-content;
+      margin-top: 34mm;
+      padding: 7px 13px;
+      border: 1px solid rgba(255,255,255,.20);
+      border-radius: 999px;
+      color: #a8f4bd;
+      background: rgba(255,255,255,.06);
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    .cover h1 { margin: 10mm 0 5mm; font-size: 33pt; line-height: 1.22; max-width: 155mm; }
+    .cover .lead { max-width: 155mm; color: #d8e7e2; font-size: 14pt; line-height: 1.8; }
+    .cover-meta { margin-top: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .cover-meta div { padding: 11px 13px; border-radius: 14px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.09); }
+    .cover-meta small { display: block; color: #a7beb7; }
+    .cover-meta strong { color: white; }
+    .page, .screen { break-before: page; }
+    .screen { min-height: 248mm; position: relative; }
+    .eyebrow { color: var(--green); font-size: 9pt; font-weight: 800; letter-spacing: .7px; }
+    h1, h2, h3, h4 { margin-top: 0; line-height: 1.35; }
+    h2 { font-size: 23pt; margin-bottom: 7mm; color: var(--ink); }
+    h3 { font-size: 14pt; margin: 7mm 0 3mm; }
+    h4 { font-size: 10.5pt; margin: 0 0 4px; color: var(--green-dark); }
+    p { margin: 0 0 3mm; }
+    ul, ol { margin: 2mm 0 4mm; padding-right: 6mm; }
+    li { margin-bottom: 1.2mm; }
+    .section-head { display: flex; align-items: center; gap: 12px; margin-bottom: 7mm; }
+    .number {
+      flex: 0 0 14mm; height: 14mm; display: grid; place-items: center;
+      border-radius: 15px; color: white; font-size: 16pt; font-weight: 900;
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      box-shadow: 0 8px 22px rgba(15,159,67,.20);
+    }
+    .section-head h2 { margin: 0; }
+    .section-head p { margin: 2px 0 0; color: var(--muted); }
+    .toc { columns: 2; column-gap: 12mm; }
+    .toc a {
+      display: flex; gap: 8px; align-items: baseline; break-inside: avoid;
+      padding: 5px 0; border-bottom: 1px dotted #c8d8d0; color: var(--ink);
+    }
+    .toc b { color: var(--green); min-width: 18px; }
+    .callout {
+      border-right: 4px solid var(--green);
+      background: var(--green-soft);
+      border-radius: 13px;
+      padding: 12px 14px;
+      margin: 4mm 0;
+    }
+    .callout.purple { border-color: var(--purple); background: #f0effc; }
+    .callout.amber { border-color: var(--amber); background: #fff5e7; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; }
+    .card {
+      break-inside: avoid;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(145deg, #fff, #f8fbf9);
+      padding: 13px 15px;
+      box-shadow: 0 7px 22px rgba(18,55,40,.055);
+    }
+    .card p:last-child, .card ul:last-child { margin-bottom: 0; }
+    .tag {
+      display: inline-block; margin: 2px 0 2px 3px; padding: 3px 8px;
+      border-radius: 999px; background: #edf5f1; color: #315347; font-size: 8.3pt; font-weight: 650;
+    }
+    .tag.green { background: #e2f7e8; color: #087735; }
+    .tag.purple { background: #eeecff; color: #5147ac; }
+    .tag.amber { background: #fff1dc; color: #9e5d0d; }
+    .flow {
+      direction: ltr; display: flex; align-items: stretch; gap: 5px;
+      margin: 5mm 0; text-align: center;
+    }
+    .flow .node {
+      flex: 1; border-radius: 12px; padding: 10px 7px; background: #f1f6f3;
+      border: 1px solid #d7e6de; font-weight: 700; font-size: 8.5pt;
+    }
+    .flow .arrow { display: grid; place-items: center; color: var(--green); font-weight: 900; }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 4mm 0; font-size: 8.8pt; }
+    th { background: #15382d; color: white; padding: 8px; text-align: right; }
+    td { padding: 7px 8px; border-bottom: 1px solid #dfe9e4; vertical-align: top; }
+    tr:nth-child(even) td { background: #f7faf8; }
+    th:first-child { border-radius: 0 10px 0 0; }
+    th:last-child { border-radius: 10px 0 0 0; }
+    .screen-summary {
+      padding: 13px 16px; border-radius: 16px; color: white;
+      background: linear-gradient(125deg, #0d8340, #087d68 55%, #5147ac);
+      margin-bottom: 5mm; font-size: 11pt;
+    }
+    .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+    .fact { border-right: 3px solid #b7dcc5; padding: 4px 10px; }
+    .fact strong { display: block; color: var(--green-dark); margin-bottom: 2px; }
+    .idea {
+      margin-top: 5mm; padding: 13px 15px; border-radius: 15px;
+      background: #101d22; color: #eaf5f0; break-inside: avoid;
+    }
+    .idea strong { color: #65e48a; }
+    .file-path { direction: ltr; text-align: left; color: #64757d; font-family: Consolas, monospace; font-size: 8pt; }
+    .status-ok { color: #087735; font-weight: 800; }
+    .status-note { color: #9e5d0d; font-weight: 800; }
+    .mini { font-size: 8.5pt; color: var(--muted); }
+    .footer {
+      position: fixed; bottom: -12mm; right: 0; left: 0; height: 8mm;
+      border-top: 1px solid #dce6e1; color: #718078; font-size: 7.8pt;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .avoid { break-inside: avoid; }
+    @media screen {
+      body { width: 210mm; margin: 0 auto; padding: 14mm 13mm 17mm; }
+      .cover { margin: -14mm -13mm -17mm; }
+      .page, .screen { padding-top: 4mm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="footer"><span>Work Key Mobile — دليل الواجهات والتقنيات</span><span>نسخة 1.0.0+1 • 22 أغسطس 2026</span></div>
+
+  <section class="cover">
+    <img class="cover-logo" src="../assets/images/logo.png" alt="Work Key">
+    <span class="cover-kicker">دليل تقني وتجربة مستخدم</span>
+    <h1>واجهات وتقنيات تطبيق<br>Work Key Mobile</h1>
+    <p class="lead">شرح عملي لكل واجهة على حدة: الهدف، رحلة المستخدم، إدارة الحالة، اتصال الباك، المكتبات المستخدمة، وأهم القرارات التصميمية والأمنية.</p>
+    <div class="cover-meta">
+      <div><small>إطار العمل</small><strong>Flutter 3.47</strong></div>
+      <div><small>إصدار التطبيق</small><strong>1.0.0+1</strong></div>
+      <div><small>تاريخ التوثيق</small><strong>22-08-2026</strong></div>
+    </div>
+  </section>
+
+  <section class="page" id="contents">
+    <span class="eyebrow">دليل القراءة</span>
+    <h2>المحتويات</h2>
+    <div class="toc">
+      <a href="#overview"><b>01</b><span>فكرة التطبيق والبنية العامة</span></a>
+      <a href="#stack"><b>02</b><span>التقنيات والمكتبات</span></a>
+      <a href="#cross"><b>03</b><span>الأنظمة المشتركة</span></a>
+      <a href="#splash"><b>04</b><span>واجهة البداية Splash</span></a>
+      <a href="#onboarding"><b>05</b><span>التعريف بالتطبيق</span></a>
+      <a href="#login"><b>06</b><span>تسجيل الدخول</span></a>
+      <a href="#register"><b>07</b><span>إنشاء حساب</span></a>
+      <a href="#forgot"><b>08</b><span>نسيان كلمة المرور</span></a>
+      <a href="#otp"><b>09</b><span>التحقق من الرمز</span></a>
+      <a href="#reset"><b>10</b><span>تغيير كلمة المرور</span></a>
+      <a href="#layout"><b>11</b><span>الغلاف والتنقل السفلي</span></a>
+      <a href="#guest"><b>12</b><span>الرئيسية للزائر</span></a>
+      <a href="#home"><b>13</b><span>الرئيسية للمستخدم</span></a>
+      <a href="#explore"><b>14</b><span>استكشاف الوظائف والفلاتر</span></a>
+      <a href="#company"><b>15</b><span>فرص الشركة</span></a>
+      <a href="#job"><b>16</b><span>تفاصيل الوظيفة</span></a>
+      <a href="#apply"><b>17</b><span>التقديم على وظيفة</span></a>
+      <a href="#applications"><b>18</b><span>طلباتي</span></a>
+      <a href="#application-details"><b>19</b><span>تفاصيل الطلب</span></a>
+      <a href="#information"><b>20</b><span>طلب معلومات إضافية</span></a>
+      <a href="#activity"><b>21</b><span>النشاط</span></a>
+      <a href="#notifications"><b>22</b><span>الإشعارات</span></a>
+      <a href="#profile"><b>23</b><span>الملف الشخصي</span></a>
+      <a href="#profile-edit"><b>24</b><span>تحرير بيانات الملف</span></a>
+      <a href="#cv-files"><b>25</b><span>ملفات CV</span></a>
+      <a href="#cv-review"><b>26</b><span>مراجعة CV وتعديله</span></a>
+      <a href="#tests"><b>27</b><span>الامتحانات</span></a>
+      <a href="#test-attempt"><b>28</b><span>جلسة الامتحان المحمية</span></a>
+      <a href="#interviews"><b>29</b><span>المقابلات</span></a>
+      <a href="#video"><b>30</b><span>مكالمة الفيديو داخل التطبيق</span></a>
+      <a href="#api-map"><b>31</b><span>خريطة أهم مسارات API</span></a>
+      <a href="#quality"><b>32</b><span>الجودة والاختبارات</span></a>
+    </div>
+    <div class="callout purple"><strong>نطاق الدليل:</strong> هذا المستند مبني على كود تطبيق الهاتف الحالي، ويشرح تجربة الباحث عن عمل. بعض مسارات صاحب العمل موجودة في طبقة API لكنها ليست محور الواجهات الحالية.</div>
+  </section>
+
+  <section class="page" id="overview">
+    <span class="eyebrow">01 — الصورة الكبيرة</span>
+    <h2>فكرة التطبيق والبنية العامة</h2>
+    <p>Work Key منصة توظيف للباحث عن عمل. تجمع اكتشاف الفرص، التقديم، إدارة الطلبات، تحليل السيرة الذاتية، الامتحانات والمقابلات داخل تطبيق واحد ثنائي اللغة.</p>
+    <div class="flow">
+      <div class="node">Flutter UI<br>واجهات ومكوّنات</div><div class="arrow">→</div>
+      <div class="node">Cubit / BLoC<br>حالة وتفاعلات</div><div class="arrow">→</div>
+      <div class="node">Repository<br>قواعد البيانات</div><div class="arrow">→</div>
+      <div class="node">API + Dio<br>HTTP / JSON</div><div class="arrow">→</div>
+      <div class="node">Laravel Backend<br>workey.onrender.com</div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><h4>طبقة العرض</h4><p>كل شاشة مسؤولة عن العرض والتفاعل فقط، وتستخدم ألوان <code>ThemeData</code> ونصوص <code>context.tr</code> لتتأقلم مع الوضع واللغة.</p></div>
+      <div class="card"><h4>إدارة الحالة</h4><p>لكل مجال Cubit مستقل: المصادقة، الوظائف، الملف، CV، الطلبات، الامتحانات، المقابلات والإشعارات.</p></div>
+      <div class="card"><h4>طبقة المستودع</h4><p>تحوّل ردود الباك إلى Models مفهومة، وتوحّد اختلافات شكل البيانات، وتمنع الواجهة من الاعتماد على JSON خام.</p></div>
+      <div class="card"><h4>طبقة الشبكة</h4><p><code>RemoteApi</code> يضيف التوكن واللغة، يضبط المهلة، يعالج multipart، ويوحّد تسجيل الأخطاء.</p></div>
+    </div>
+    <h3>مبادئ التصميم الرئيسية</h3>
+    <div class="grid-3">
+      <div class="card"><h4>حالة واضحة</h4><p>Loading، Empty، Error، Success، مع Retry موحّد.</p></div>
+      <div class="card"><h4>مصدر حقيقة واحد</h4><p>الباك هو المرجع النهائي للحالة، والواجهة تحدّث نفسها بعد كل إجراء.</p></div>
+      <div class="card"><h4>وصول آمن</h4><p>التوكن، التحقق من البريد، منع اللقطات، ورصد مغادرة الجلسات الحساسة.</p></div>
+    </div>
+    <div class="idea"><strong>أهم فكرة:</strong> التطبيق ليس مجموعة صفحات منفصلة؛ إنه سلسلة حالات مترابطة. نجاح تحديث CV مثلًا يجب أن ينعكس على الملف الشخصي ثم على أهلية التقديم، لذلك تم فصل المسؤوليات مع إبقاء تحديث الحالة بين الوحدات واضحًا.</div>
+  </section>
+
+  <section class="page" id="stack">
+    <span class="eyebrow">02 — TECHNOLOGY STACK</span>
+    <h2>التقنيات والمكتبات المستخدمة</h2>
+    <table>
+      <thead><tr><th>المكتبة</th><th>الإصدار</th><th>الاستخدام الفعلي</th></tr></thead>
+      <tbody>
+        <tr><td>Flutter / Dart</td><td>3.47 / 3.13</td><td>بناء الواجهات، Material 3، الأنيميشن، إدارة دورة حياة التطبيق.</td></tr>
+        <tr><td>flutter_bloc</td><td>9.1.1</td><td>Cubit وBlocBuilder وBlocConsumer لكل حالات التطبيق.</td></tr>
+        <tr><td>dio</td><td>5.11.0</td><td>طلبات REST، multipart، تنزيل bytes، المهلات ومعالجة الأخطاء.</td></tr>
+        <tr><td>shared_preferences</td><td>2.5.5</td><td>حفظ التوكن، اللغة، الثيم وحالة onboarding.</td></tr>
+        <tr><td>firebase_core / messaging</td><td>4.13.0 / 16.5.0</td><td>تهيئة Firebase واستقبال FCM داخل التطبيق وخارجه.</td></tr>
+        <tr><td>flutter_local_notifications</td><td>22.3.0</td><td>عرض إشعار محلي عندما تكون الرسالة واردة والتطبيق مفتوح.</td></tr>
+        <tr><td>livekit_client</td><td>2.11.0</td><td>غرفة مكالمة الفيديو، الصوت والكاميرا داخل التطبيق.</td></tr>
+        <tr><td>file_picker</td><td>12.0.0</td><td>رفع CV، مرفقات طلب المعلومات، إجابات الملفات، وحفظ CV على الجهاز.</td></tr>
+        <tr><td>image_picker</td><td>1.2.3</td><td>اختيار أو تصوير صورة الملف الشخصي.</td></tr>
+        <tr><td>pin_code_fields</td><td>9.4.0</td><td>حقل OTP مؤلف من ست خانات مع حركة إدخال.</td></tr>
+        <tr><td>intl</td><td>0.20.3</td><td>تنسيق مواعيد الوظائف والطلبات والإشعارات والمقابلات.</td></tr>
+        <tr><td>smooth_page_indicator</td><td>2.0.1</td><td>مؤشر صفحات onboarding.</td></tr>
+        <tr><td>flutter_holo_date_picker</td><td>2.0.0</td><td>منتقي تاريخ مشترك في مكونات الإدخال.</td></tr>
+        <tr><td>flutter_radio_group</td><td>2.1.0</td><td>مجموعات خيارات ضمن المكونات المشتركة.</td></tr>
+        <tr><td>hexcolor</td><td>3.1.3</td><td>قراءة بعض قيم الألوان القديمة ضمن constants.</td></tr>
+      </tbody>
+    </table>
+    <div class="callout amber"><strong>تبعيات موجودة وليست مستخدمة مباشرة في واجهات lib الحالية:</strong> <code>equatable</code> و<code>google_nav_bar</code> و<code>dropdown_button2</code> و<code>font_awesome_flutter</code> و<code>url_launcher</code>. وجودها لا يعني أنها جزء من التدفق الحالي، ويمكن تقييم حذفها لاحقًا لتقليل الصيانة.</div>
+    <h3>التقنيات الأصلية من Flutter</h3>
+    <p><span class="tag green">Material 3</span><span class="tag">Navigator</span><span class="tag purple">AnimationController</span><span class="tag">TweenAnimationBuilder</span><span class="tag">AnimatedSwitcher</span><span class="tag">PopScope</span><span class="tag amber">MethodChannel</span><span class="tag">WidgetsBindingObserver</span></p>
+  </section>
+
+  <section class="page" id="cross">
+    <span class="eyebrow">03 — أنظمة تعمل في جميع الصفحات</span>
+    <h2>الثيم، اللغة، الشبكة والإشعارات</h2>
+    <div class="grid-2">
+      <div class="card"><h4>Light / Dark Theme</h4><p><code>AppThemeData</code> يبني ColorScheme منفصلًا للوضعين، ويغطي Scaffold، Card، BottomSheet، الحقول، الأزرار، Dialog، Chip وSnackBar. الوضع الافتراضي Light.</p></div>
+      <div class="card"><h4>العربية والإنكليزية</h4><p>ملفا <code>assets/translations/ar.json</code> و<code>en.json</code> يحملان المفاتيح نفسها. <code>LocaleCubit</code> يحفظ الاختيار، ويُرسل <code>Accept-Language</code> و<code>Content-Language</code> مع كل طلب.</p></div>
+      <div class="card"><h4>الوسائط</h4><p><code>media_url.dart</code> يحوّل المسارات التي يعيدها الباك إلى روابط قابلة للعرض، وتستخدم CompanyLogo وImage.network حالات fallback عند فشل الصورة.</p></div>
+      <div class="card"><h4>الإشعارات</h4><p>FCM token يُرسل إلى <code>/device-tokens</code> مع المنصة واللغة، ويُعاد تسجيله عند refresh أو resume. الإشعار داخل التطبيق يتحول إلى local notification.</p></div>
+      <div class="card"><h4>الأخطاء</h4><p><code>DioErrorHandler</code> يفرّق بين timeout، انقطاع الشبكة، خطأ الباك والجلسة. <code>AppSnackBar</code> يعرض رسالة عصرية متوافقة مع الثيم.</p></div>
+      <div class="card"><h4>التحميل والحالات الفارغة</h4><p>Skeletons وCircularProgressIndicator للتحميل، رسائل Empty عند غياب البيانات، وزر ModernRetryButton عند فشل قابل لإعادة المحاولة.</p></div>
+    </div>
+    <div class="idea"><strong>الفكرة المهمة:</strong> لا تُترجم الأزرار فقط؛ اللغة المختارة تصل إلى الباك أيضًا، لذلك يمكن للخادم إعادة labels ورسائل وحالات مترجمة بنفس لغة الهاتف.</div>
+  </section>
+
+  <section class="screen" id="splash">
+    <div class="section-head"><div class="number">04</div><div><h2>واجهة البداية — Splash</h2><p>نقطة اتخاذ قرار المسار الأول.</p></div></div>
+    <div class="screen-summary">تعرض الهوية البصرية بحركة قصيرة، ثم تقرر هل يذهب المستخدم إلى onboarding أو تسجيل الدخول أو التطبيق الرئيسي.</div>
+    <div class="facts">
+      <div class="fact"><strong>المسؤولية</strong>قراءة القيم المحفوظة والتأكد من وجود جلسة.</div>
+      <div class="fact"><strong>التقنيات</strong>AnimationController، Fade/Scale، SharedPreferences، Navigator.pushReplacement.</div>
+      <div class="fact"><strong>الحالة</strong>لا تحتاج Cubit مستقلًا؛ القرار محلي وسريع.</div>
+      <div class="fact"><strong>الملف</strong><span class="file-path">lib/screens/auth/SplashScreen.dart</span></div>
+    </div>
+    <h3>التدفق</h3>
+    <div class="flow"><div class="node">تشغيل التطبيق</div><div class="arrow">→</div><div class="node">قراءة onboarding والتوكن</div><div class="arrow">→</div><div class="node">اختيار الوجهة</div><div class="arrow">→</div><div class="node">استبدال الصفحة</div></div>
+    <div class="idea"><strong>أهم فكرة:</strong> استخدام pushReplacement يمنع الرجوع بزر Back إلى شاشة البداية بعد دخول التطبيق.</div>
+  </section>
+
+  <section class="screen" id="onboarding">
+    <div class="section-head"><div class="number">05</div><div><h2>واجهة التعريف — Onboarding</h2><p>شرح قيمة التطبيق قبل المصادقة.</p></div></div>
+    <div class="screen-summary">صفحات أفقية مختصرة تقدم الوظائف والملف المهني ومسار التوظيف، مع مؤشر حركة وأزرار تخطي/متابعة.</div>
+    <div class="grid-2">
+      <div class="card"><h4>العناصر</h4><ul><li>PageView للمحتوى.</li><li>صور من assets.</li><li>SmoothPageIndicator.</li><li>زر متابعة يتغير في الصفحة الأخيرة.</li></ul></div>
+      <div class="card"><h4>الحفظ والتنقل</h4><p>عند الإنهاء تُحفظ علامة onboarding في SharedPreferences ثم تُفتح شاشة تسجيل الدخول؛ وبذلك لا تظهر الجولة في كل تشغيل.</p></div>
+    </div>
+    <p class="file-path">lib/screens/auth/onboardind_screen/onboarding_screen.dart • onboarding_page.dart</p>
+    <div class="idea"><strong>أهم فكرة UX:</strong> المحتوى قصير ومرئي، والتقدم واضح؛ الهدف ليس شرح كل ميزة بل إعطاء سبب مقنع للمتابعة.</div>
+  </section>
+
+  <section class="screen" id="login">
+    <div class="section-head"><div class="number">06</div><div><h2>واجهة تسجيل الدخول</h2><p>دخول آمن مع معالجة الحساب غير المتحقق.</p></div></div>
+    <div class="screen-summary">حقلا البريد وكلمة المرور، استعادة كلمة المرور، دخول كزائر، وإنشاء حساب. جميع العناوين والرسائل مترجمة وتستجيب للوضع الداكن.</div>
+    <div class="grid-2">
+      <div class="card"><h4>التحقق المحلي</h4><p>يُمنع الإرسال إذا كان أحد الحقلين فارغًا، وتظهر AppSnackBar مترجمة بدل خطأ خام.</p></div>
+      <div class="card"><h4>استجابة الباك</h4><p><code>POST auth/login</code>. عند النجاح يُحفظ token. عند <code>EMAIL_NOT_VERIFIED</code> ينتقل المستخدم تلقائيًا إلى شاشة OTP ويُرسل رمز جديد.</p></div>
+      <div class="card"><h4>إدارة الحالة</h4><p>AuthCubit: Loading يعطّل الزر، Success ينقل إلى Layout، Error يعرض الرسالة أو يغيّر المسار للتحقق.</p></div>
+      <div class="card"><h4>المكتبات</h4><p>flutter_bloc، shared_preferences، Dio، AppLocalizations، مكونات الحقول المشتركة.</p></div>
+    </div>
+    <p class="file-path">lib/screens/auth/login/login_screen.dart • data/repo/auth_repo.dart</p>
+    <div class="idea"><strong>أهم فكرة:</strong> عدم معاملة الحساب غير الموثّق كخطأ نهائي؛ يتم تحويله إلى مسار قابل للإكمال مع الاحتفاظ بالبريد وكلمة المرور اللازمة لتسجيل الدخول بعد التحقق.</div>
+  </section>
+
+  <section class="screen" id="register">
+    <div class="section-head"><div class="number">07</div><div><h2>واجهة إنشاء الحساب</h2><p>جمع الحد الأدنى من البيانات المطلوبة من الباك.</p></div></div>
+    <div class="screen-summary">تجمع الاسم والبريد والهاتف والمدينة وتفاصيل الموقع وكلمة المرور وتأكيدها، ثم تنقل المستخدم إلى OTP.</div>
+    <div class="grid-2">
+      <div class="card"><h4>الحقول</h4><p>المدينة تأتي من ReferenceRepo، مع loader داخل Dropdown. يتم إرسال <code>terms_accepted: true</code> وفق عقد التسجيل.</p></div>
+      <div class="card"><h4>التحقق</h4><p>الحقول المطلوبة وتطابق كلمتي المرور تُفحص محليًا قبل <code>POST auth/register/job-seeker</code>.</p></div>
+      <div class="card"><h4>الانتقال</h4><p>عند 201 تُفتح VerificationCodeScreen بنفس البريد وكلمة المرور. التسجيل نفسه يرسل الرمز الأول، لذلك لا يُكرر الطلب عند فتح الصفحة.</p></div>
+      <div class="card"><h4>الترجمة</h4><p>العنوان، الحقول، رسائل النقص والتطابق، زر الزائر وروابط الدخول كلها تعتمد مفاتيح auth في ملفي الترجمة.</p></div>
+    </div>
+    <p class="file-path">lib/screens/auth/register/register_screen.dart</p>
+    <div class="idea"><strong>أهم فكرة:</strong> فصل إنشاء الحساب عن إنشاء الجلسة؛ لا يُحفظ token إلا بعد أن يصبح البريد متحققًا.</div>
+  </section>
+
+  <section class="screen" id="forgot">
+    <div class="section-head"><div class="number">08</div><div><h2>واجهة نسيان كلمة المرور</h2><p>المرحلة الأولى من استعادة الحساب.</p></div></div>
+    <div class="screen-summary">واجهة بسيطة تطلب البريد فقط، ترسل رمز الاستعادة، ثم تنتقل إلى شاشة التحقق العامة بوضع resetPassword.</div>
+    <div class="facts">
+      <div class="fact"><strong>API</strong><code>POST auth/forgot-password</code></div>
+      <div class="fact"><strong>الحالة</strong>AuthLoading، ForgotPasswordSuccess، AuthError.</div>
+      <div class="fact"><strong>التصميم</strong>رسم توضيحي، حقل واحد، CTA واضح، رسائل مترجمة.</div>
+      <div class="fact"><strong>الملف</strong><span class="file-path">lib/screens/auth/forgot_password/forgot_password_screen.dart</span></div>
+    </div>
+    <div class="idea"><strong>أهم فكرة:</strong> إبقاء استعادة كلمة المرور في واجهتين لاحقتين واضحتين: التحقق أولًا، ثم اختيار كلمة جديدة، بدل مزج الخطوات في نموذج طويل.</div>
+  </section>
+
+  <section class="screen" id="otp">
+    <div class="section-head"><div class="number">09</div><div><h2>واجهة التحقق من الرمز OTP</h2><p>واجهة واحدة بثلاثة سياقات.</p></div></div>
+    <div class="screen-summary">تُستخدم بعد التسجيل، عند محاولة دخول حساب غير متحقق، وبعد نسيان كلمة المرور. تعرض بريدًا مخفيًا جزئيًا وعدّاد إعادة الإرسال.</div>
+    <div class="grid-2">
+      <div class="card"><h4>إدخال الرمز</h4><p>MaterialPinField من pin_code_fields، ست خانات LTR، حركة scale، وإرسال تلقائي عند اكتمال حساب التفعيل.</p></div>
+      <div class="card"><h4>إعادة الإرسال</h4><p><code>POST auth/email/resend-otp</code> يحتاج البريد فقط. أزيل شرط كلمة المرور الذي كان يُظهر رسالة «أعد تسجيل الدخول» بصورة خاطئة.</p></div>
+      <div class="card"><h4>تحقق الحساب</h4><p><code>POST auth/email/verify-otp</code> ثم login بنفس البيانات للحصول على token، ولا يمكن الرجوع من مسار تفعيل الحساب قبل اكتماله.</p></div>
+      <div class="card"><h4>استعادة كلمة المرور</h4><p>بعد إدخال الرمز ينتقل إلى ResetPasswordScreen ويُمرّر البريد والرمز دون تسجيل دخول.</p></div>
+    </div>
+    <p class="file-path">lib/screens/auth/verification/verification_screen.dart</p>
+    <div class="idea"><strong>أهم فكرة:</strong> إعادة استخدام واجهة واحدة مع enum واضح للتدفق يمنع اختلاف السلوك والتصميم بين التسجيل والدخول والاستعادة.</div>
+  </section>
+
+  <section class="screen" id="reset">
+    <div class="section-head"><div class="number">10</div><div><h2>واجهة تعيين كلمة مرور جديدة</h2><p>المرحلة النهائية من الاستعادة.</p></div></div>
+    <div class="screen-summary">حقلا كلمة المرور والتأكيد ضمن بطاقة واضحة، مع شرط ثمانية أحرف ورسائل تطابق وحالة تحميل.</div>
+    <div class="facts">
+      <div class="fact"><strong>API</strong><code>POST auth/reset-password</code></div>
+      <div class="fact"><strong>Payload</strong>email، otp، password، password_confirmation.</div>
+      <div class="fact"><strong>النجاح</strong>رسالة نجاح ثم إزالة المسار والعودة إلى Login.</div>
+      <div class="fact"><strong>الثيم</strong>ألوان النص والحقل والرمز من ColorScheme في الوضعين.</div>
+    </div>
+    <div class="idea"><strong>أهم فكرة:</strong> كلمة المرور لا تُغيّر عند إدخال OTP فقط؛ يبقى التحقق منفصلًا عن الحفظ حتى تكون رحلة المستخدم مفهومة وقابلة للتصحيح.</div>
+  </section>
+
+  <section class="screen" id="layout">
+    <div class="section-head"><div class="number">11</div><div><h2>الغلاف الرئيسي والتنقل السفلي</h2><p>Layout الذي يحتوي صفحات التطبيق الأساسية.</p></div></div>
+    <div class="screen-summary">Header متحرك دون AppBar تقليدي، وBottom Navigation مخصص بخمس وجهات؛ زر الرئيسية هو شعار Work Key في المنتصف بحركة خاصة.</div>
+    <div class="grid-2">
+      <div class="card"><h4>التبويبات</h4><p>استكشاف، طلباتي، الرئيسية، النشاط، الملف الشخصي. تستخدم IndexedStack للحفاظ على حالة الشاشة عند الانتقال.</p></div>
+      <div class="card"><h4>التحميل الكسول</h4><p>لا تُبنى كل الصفحات الثقيلة فورًا؛ تُسجل التبويبات التي زارها المستخدم لتقليل العمل الأولي.</p></div>
+      <div class="card"><h4>الأنيميشن</h4><p>AnimationController وAnimatedContainer وAnimatedOpacity وTransform لتحريك الشعار المركزي وحالة الاختيار والهيدر.</p></div>
+      <div class="card"><h4>التوافق</h4><p>SafeArea، قياسات مرنة، labels مترجمة، padding خاص لتبويب الملف، وألوان مستقلة للدارك واللايت.</p></div>
+    </div>
+    <p class="file-path">lib/layout/layout.dart • shared/components/animated_app_logo.dart</p>
+    <div class="idea"><strong>أهم فكرة:</strong> الرئيسية ليست مجرد icon إضافي؛ الشعار نفسه أصبح نقطة الارتكاز البصرية والوظيفية في منتصف التنقل.</div>
+  </section>
+
+  <section class="screen" id="guest">
+    <div class="section-head"><div class="number">12</div><div><h2>الواجهة الرئيسية للزائر</h2><p>استكشاف حقيقي دون جلسة.</p></div></div>
+    <div class="screen-summary">تعرض Hero، وظائف وشركات ومزايا المنصة. يمكن للزائر فتح تفاصيل وظيفة، لكن الضغط على التقديم ينقله إلى تسجيل الدخول بدل إظهار خطأ API.</div>
+    <div class="grid-2">
+      <div class="card"><h4>مصدر البيانات</h4><p><code>GET home</code> مع auth اختياري؛ الباك يحدد viewer والكتل المناسبة.</p></div>
+      <div class="card"><h4>المسارات</h4><p>التسجيل، الدخول، تفاصيل الوظيفة، فرص الشركة، واستكشاف المزيد.</p></div>
+      <div class="card"><h4>الحالات</h4><p>Skeleton داكن/فاتح، Empty مفيد دون زر Retry عند عدم وجود بيانات، وRetry فقط عند فشل الشبكة.</p></div>
+      <div class="card"><h4>الصور</h4><p>عرض cover/logo للشركة من الرابط الذي يعيده الباك مع fallback يحمل الحروف الأولى.</p></div>
+    </div>
+    <div class="idea"><strong>أهم فكرة UX:</strong> السماح بالمشاهدة قبل التسجيل يقلل الاحتكاك، بينما تحويل Apply إلى Login يحافظ على وضوح السبب والإجراء التالي.</div>
+  </section>
+
+  <section class="screen" id="home">
+    <div class="section-head"><div class="number">13</div><div><h2>الرئيسية للمستخدم</h2><p>ملخص شخصي لما يحتاج انتباهه الآن.</p></div></div>
+    <div class="screen-summary">ترحيب بالاسم، جرس إشعارات مع العدد غير المقروء، اكتمال الملف، إجراءات مطلوبة، وظائف موصى بها وشركات.</div>
+    <div class="grid-2">
+      <div class="card"><h4>HomeCubit</h4><p>يجلب HomeResponseModel ويحوّل كتل الباك إلى أقسام قابلة للعرض.</p></div>
+      <div class="card"><h4>الإجراءات الذكية</h4><p>HomeNavigation يقرأ نوع الهدف ومعرفه ويوجه إلى وظيفة أو طلب أو اختبار أو مقابلة أو طلب معلومات.</p></div>
+      <div class="card"><h4>الملف المهني</h4><p>بطاقة نسبة الاكتمال تعرض العنصر التالي الناقص بدل نسبة بلا معنى.</p></div>
+      <div class="card"><h4>التحديث</h4><p>RefreshIndicator يعيد تحميل البيانات، والإشعارات تُحدّث العدد في الهيدر.</p></div>
+    </div>
+    <p class="file-path">lib/screens/home_screen/home_screen.dart • home_navigation.dart</p>
+    <div class="idea"><strong>أهم فكرة:</strong> الرئيسية تعمل كلوحة قرار، لا كقائمة محتوى؛ كل بطاقة يجب أن تقود إلى إجراء فعلي لا إلى صفحة فارغة.</div>
+  </section>
+
+  <section class="screen" id="explore">
+    <div class="section-head"><div class="number">14</div><div><h2>استكشاف الوظائف والفلاتر</h2><p>بحث قابل للتوسع بعقد يتحكم به الباك.</p></div></div>
+    <div class="screen-summary">تبويبات «لك، الأحدث، الكل»، بحث مع debounce، pagination، وفلاتر ديناميكية تأتي من schema الباك.</div>
+    <div class="grid-2">
+      <div class="card"><h4>الفلترة</h4><p><code>GET reference/job-filters</code> يحدد الحقول والأنواع والخيارات؛ المصادر البعيدة تُحمّل عند الحاجة وباللغة المختارة.</p></div>
+      <div class="card"><h4>الترشيح</h4><p><code>GET jobs/recommended</code> يعيد نسبة التطابق، وتظهر على كارد الوظيفة المقترحة.</p></div>
+      <div class="card"><h4>حالة الوظيفة</h4><p>Badges واضحة: جديدة، انتهى التقديم، تم التقديم. AppliedJobsStore يعزز الحالة من طلبات المستخدم.</p></div>
+      <div class="card"><h4>الأداء</h4><p>تأخير البحث يمنع طلبًا مع كل حرف، والصفحات تُدمج بدل استبدال القائمة.</p></div>
+    </div>
+    <p class="file-path">lib/screens/explore_jobs • logic/explore_jobs_cubit</p>
+    <div class="idea"><strong>أهم فكرة:</strong> الفلاتر لا تُثبت داخل التطبيق؛ schema الباك يسمح بإضافة خيار أو تغيير endpoint دون إعادة بناء الواجهة كلها.</div>
+  </section>
+
+  <section class="screen" id="company">
+    <div class="section-head"><div class="number">15</div><div><h2>واجهة فرص الشركة</h2><p>استكشاف الوظائف ضمن سياق شركة واحدة.</p></div></div>
+    <div class="screen-summary">عند الضغط على كارد شركة يُفتح ExploreJobsScreen في وضع company_id، مع هوية الشركة وقائمة فرصها فقط.</div>
+    <div class="facts">
+      <div class="fact"><strong>API</strong><code>GET companies/{companyId}/jobs</code></div>
+      <div class="fact"><strong>الوسائط</strong>Logo وCover مستقلان؛ لا يُستخدم أحدهما بدل الآخر إلا كـ fallback.</div>
+      <div class="fact"><strong>الحالات</strong>Loading، Empty خاص بالشركة، Error + Retry.</div>
+      <div class="fact"><strong>إعادة الاستخدام</strong>نفس كارد الوظيفة والتصفح مع query مختلف.</div>
+    </div>
+    <div class="idea"><strong>أهم فكرة:</strong> إعادة استخدام شاشة الاستكشاف في وضع مقيّد تقلل تكرار الكود وتحافظ على نفس تجربة البطاقات والفلاتر.</div>
+  </section>
+
+  <section class="screen" id="job">
+    <div class="section-head"><div class="number">16</div><div><h2>واجهة تفاصيل الوظيفة</h2><p>عرض القرار قبل التقديم.</p></div></div>
+    <div class="screen-summary">Hero ملون يحمل الشركة والمسمى والموقع والنمط والدوام، ثم الوصف والمهارات والمسؤوليات والمتطلبات والمزايا والموعد النهائي.</div>
+    <div class="grid-2">
+      <div class="card"><h4>API</h4><p><code>GET jobs/{id}</code> مع preserveDioError لتمييز وظيفة محذوفة عن انقطاع شبكة.</p></div>
+      <div class="card"><h4>الشركة</h4><p>CompanyLogo يعرض رابط logo، وصورة الغلاف تستخدم cover_image_url مع fallback بصري.</p></div>
+      <div class="card"><h4>حالة الزر</h4><p>Applied يعطّل التقديم، Closed/Expired يعرض انتهاء التقديم، والزائر يُوجّه إلى Login.</p></div>
+      <div class="card"><h4>الحالة المحلية</h4><p>AppliedJobsStore يمنع إعادة التقديم حتى لو لم يتضمن رد تفاصيل الوظيفة viewer_application.</p></div>
+    </div>
+    <p class="file-path">lib/screens/jobs/job_details_screen.dart</p>
+    <div class="idea"><strong>أهم فكرة:</strong> نص زر التقديم نفسه يشرح الحالة الحالية، فلا يحتاج المستخدم لاكتشاف المنع بعد إرسال طلب فاشل.</div>
+  </section>
+
+  <section class="screen" id="apply">
+    <div class="section-head"><div class="number">17</div><div><h2>واجهة التقديم على وظيفة</h2><p>تقديم مباشر من بيانات الملف الشخصي.</p></div></div>
+    <div class="screen-summary">Bottom Sheet حديث يوضح أن الملف الشخصي الموثق وآخر CV فعّال سيُشاركان، ويطلب Cover Letter وأسئلة الفرز عند وجودها.</div>
+    <div class="facts">
+      <div class="fact"><strong>Payload الأساسي</strong><code>cover_letter</code> و<code>consent_to_share_profile: true</code> وإجابات الأسئلة المطلوبة.</div>
+      <div class="fact"><strong>لا يوجد اختيار CV</strong>الباك يعتمد معلومات البروفايل وCV الفعال، لذلك أزيل الاختيار اليدوي.</div>
+      <div class="fact"><strong>منع التكرار</strong>استجابة already applied تتحول إلى حالة واضحة وتُحفظ محليًا.</div>
+      <div class="fact"><strong>API</strong><code>POST jobs/{id}/applications</code></div>
+    </div>
+    <p class="file-path">lib/screens/jobs/apply_job_sheet.dart</p>
+    <div class="idea"><strong>أهم فكرة:</strong> النموذج يرسل فقط ما يطلبه عقد الباك. كل حقل إضافي غير مدعوم يزيد فرص 422 دون قيمة للمستخدم.</div>
+  </section>
+
+  <section class="screen" id="applications">
+    <div class="section-head"><div class="number">18</div><div><h2>واجهة طلباتي</h2><p>مركز متابعة رحلة التوظيف.</p></div></div>
+    <div class="screen-summary">بحث، فلاتر للحالات، عداد للطلبات التي تحتاج إجراء، وبطاقات تعرض الوظيفة والشركة والحالة والإجراء التالي.</div>
+    <div class="grid-2">
+      <div class="card"><h4>API</h4><p><code>GET applications/my</code> مع page وfilters.</p></div>
+      <div class="card"><h4>التقسيم</h4><p>الكل، نشطة، تحتاج إجراء، مكتملة. Empty message مستقل لكل مجموعة.</p></div>
+      <div class="card"><h4>البيانات</h4><p>ApplicationsResponseModel يعالج pagination والعدادات وallowed actions.</p></div>
+      <div class="card"><h4>التنقل</h4><p>الكارد يفتح التفاصيل، والإجراء السريع قد يقود إلى اختبار أو مقابلة أو طلب معلومات.</p></div>
+    </div>
+    <div class="idea"><strong>أهم فكرة:</strong> ترتيب الطلبات حسب حاجتها لتصرف المستخدم أهم من ترتيبها الزمني فقط.</div>
+  </section>
+
+  <section class="screen" id="application-details">
+    <div class="section-head"><div class="number">19</div><div><h2>واجهة تفاصيل طلب التوظيف</h2><p>خط زمني كامل للطلب.</p></div></div>
+    <div class="screen-summary">تعرض الوظيفة والشركة والحالة الحالية وCover Letter وإجابات الفرز والتاريخ المتسلسل والتصرف التالي المتاح.</div>
+    <div class="facts">
+      <div class="fact"><strong>API</strong><code>GET applications/{id}</code></div>
+      <div class="fact"><strong>السحب</strong><code>POST applications/{id}/withdraw</code> مع سبب اختياري وبعد تأكيد Dialog.</div>
+      <div class="fact"><strong>الإجراءات</strong>فتح طلب المعلومات، الاختبار، أو المقابلة بحسب next_action.</div>
+      <div class="fact"><strong>الهوية</strong>ApplicationStatusTheme يوحّد لون وأيقونة كل حالة.</div>
+    </div>
+    <div class="idea"><strong>أهم فكرة:</strong> الخط الزمني يحوّل الحالة التقنية إلى قصة مفهومة: ماذا حدث، متى، وما المطلوب الآن.</div>
+  </section>
+
+  <section class="screen" id="information">
+    <div class="section-head"><div class="number">20</div><div><h2>واجهة طلب معلومات إضافية</h2><p>الرد على الشركة من الهاتف.</p></div></div>
+    <div class="screen-summary">تعرض سؤال الشركة والموعد والحالة، وتسمح بكتابة الرد وإرفاق عدة ملفات ثم إرسال multipart.</div>
+    <div class="grid-2">
+      <div class="card"><h4>الجلب</h4><p><code>GET information-requests/{id}</code> لعرض التفاصيل الحالية.</p></div>
+      <div class="card"><h4>الإرسال</h4><p><code>POST information-requests/{id}/respond</code> عبر FormData، مع text ومرفقات.</p></div>
+      <div class="card"><h4>المكتبة</h4><p>file_picker لاختيار الملفات وDio MultipartFile لإرسالها.</p></div>
+      <div class="card"><h4>UX</h4><p>تظهر أسماء الملفات ويمكن حذف كل مرفق قبل الإرسال، مع تعطيل الزر أثناء الرفع.</p></div>
+    </div>
+    <div class="idea"><strong>أهم فكرة:</strong> نقل الإجراء كاملًا إلى الموبايل؛ الإشعار لا يكتفي بإخبار المستخدم بل يقوده إلى شاشة يستطيع فيها إنهاء المطلوب.</div>
+  </section>
+
+  <section class="screen" id="activity">
+    <div class="section-head"><div class="number">21</div><div><h2>واجهة النشاط</h2><p>Feed موحّد للأحداث المهنية.</p></div></div>
+    <div class="screen-summary">تعرض أحداث الطلبات والاختبارات والمقابلات والإشعارات بترتيب زمني، مع فلاتر وحالة غير مقروء.</div>
+    <div class="facts">
+      <div class="fact"><strong>API</strong><code>GET activity</code> مع query ديناميكي.</div>
+      <div class="fact"><strong>التصفية</strong>نوع الحدث، القراءة، الفرز والاتجاه.</div>
+      <div class="fact"><strong>التفاعل</strong>فتح الهدف وتحديد الإشعار كمقروء.</div>
+      <div class="fact"><strong>التنسيق</strong>intl للتاريخ وActivityStrings للنصوص.</div>
+    </div>
+    <div class="idea"><strong>أهم فكرة:</strong> النشاط يجمع مصادر متعددة في نموذج بصري واحد، بينما تبقى وجهة كل حدث محددة ببيانات action من الباك.</div>
+  </section>
+
+  <section class="screen" id="notifications">
+    <div class="section-head"><div class="number">22</div><div><h2>واجهة الإشعارات</h2><p>قائمة داخلية متصلة بالتنقل العميق.</p></div></div>
+    <div class="screen-summary">AppBar مرن يحمل أيقونة وعنوانًا لا يفيض في العربية، وزر «تحديد الكل كمقروء» أصبح أيقونة ذات Tooltip لتجنب خربطة المساحة العلوية.</div>
+    <div class="grid-2">
+      <div class="card"><h4>الحالات</h4><p>المقروء وغير المقروء يختلفان في الخلفية والوزن والنقطة، مع Empty وError وPull to refresh.</p></div>
+      <div class="card"><h4>التفاعل</h4><p>عند الضغط يُحدد الإشعار كمقروء ثم يحلل action.type وtarget.id وroute لفتح المكان المقصود.</p></div>
+      <div class="card"><h4>API</h4><p>list، unread-count، read، read-all، delete.</p></div>
+      <div class="card"><h4>التقنيات</h4><p>NotificationsCubit، intl، HomeNavigation، FirebaseMessaging للإشعارات الخارجية.</p></div>
+    </div>
+    <p class="file-path">lib/screens/notifications/notifications_screen.dart • services/push_notification_service.dart</p>
+    <div class="idea"><strong>أهم فكرة:</strong> الإشعار الناجح ليس رسالة فقط؛ يجب أن يكون رابطًا موثوقًا إلى العنصر الذي تسبب به.</div>
+  </section>
+
+  <section class="screen" id="profile">
+    <div class="section-head"><div class="number">23</div><div><h2>واجهة الملف الشخصي</h2><p>الهوية المهنية الكاملة للمستخدم.</p></div></div>
+    <div class="screen-summary">أصبح قسم CV أول عنصر بعد عنوان الصفحة، ثم صورة وبيانات المستخدم، الملخص، التواصل، التوفر، المهارات، الخبرات، التعليم والمقابلات.</div>
+    <div class="grid-2">
+      <div class="card"><h4>API</h4><p><code>GET profile</code>، ويحوّل ProfileRepo الأشكال المتداخلة إلى ProfileModel موحّد.</p></div>
+      <div class="card"><h4>الصورة</h4><p>image_picker من المعرض أو الكاميرا، ثم multipart بالحقل <code>image</code>، مع حذف مستقل.</p></div>
+      <div class="card"><h4>تحديث CV</h4><p>بعد التأكيد النهائي يطبق ProfileCubit البيانات المرجعة فورًا ثم يعيد GET profile لضمان التطابق.</p></div>
+      <div class="card"><h4>الإعدادات</h4><p>اللغة، الثيم، تسجيل الخروج من الجهاز أو كل الأجهزة.</p></div>
+    </div>
+    <div class="idea"><strong>أهم فكرة:</strong> ترتيب CV أولًا يضع الإجراء الأعلى قيمة في بداية الصفحة، بينما تبقى باقي البيانات قابلة للتحرير اليدوي.</div>
+  </section>
+
+  <section class="screen" id="profile-edit">
+    <div class="section-head"><div class="number">24</div><div><h2>تحرير وإدارة بيانات الملف</h2><p>نماذج منفصلة للبيانات الشخصية والمهنية.</p></div></div>
+    <div class="screen-summary">Bottom Sheets متوافقة مع لوحة المفاتيح والثيم لتحرير الاسم والعنوان والملخص والموقع والتوفر والروابط، وإدارة الخبرة والتعليم والمهارات.</div>
+    <div class="grid-2">
+      <div class="card"><h4>الملف الأساسي</h4><p><code>PUT profile</code> ويعتمد التطبيق الرد الكامل مباشرة لتجنب GET ثانٍ قد يفشل بعد نجاح الحفظ.</p></div>
+      <div class="card"><h4>الخبرات</h4><p>CRUD عبر <code>profile/experiences</code> مع إلزام المسمى واسم الشركة.</p></div>
+      <div class="card"><h4>التعليم</h4><p>CRUD عبر <code>profile/education</code> مع إلزام المؤسسة.</p></div>
+      <div class="card"><h4>المهارات</h4><p>تحميل catalog ثم attach/detach كل مهارة بمعرفها.</p></div>
+    </div>
+    <div class="idea"><strong>أهم فكرة:</strong> النماذج ترسل payload مطابقًا لعقد الباك بدل إرسال Model كامل قد يحتوي حقول قراءة فقط.</div>
+  </section>
+
+  <section class="screen" id="cv-files">
+    <div class="section-head"><div class="number">25</div><div><h2>قسم ملفات السيرة الذاتية</h2><p>إدارة كل ملف بصورة مستقلة.</p></div></div>
+    <div class="screen-summary">رفع PDF/DOC/DOCX، متابعة المعالجة، فتح المراجعة، تنزيل الملف إلى الجهاز، وحذف كل CV قابل للإلغاء على حدة.</div>
+    <div class="grid-2">
+      <div class="card"><h4>الرفع</h4><p>file_picker ثم Dio FormData إلى <code>POST cv/upload</code> مع version_label.</p></div>
+      <div class="card"><h4>التنزيل</h4><p><code>GET cv/{id}/download</code> بصيغة bytes، ثم FilePicker.saveFile يفتح حفظ النظام ويكتب البيانات في الوجهة التي يختارها المستخدم.</p></div>
+      <div class="card"><h4>الحذف</h4><p><code>POST cv/{id}/cancel</code> بعد Dialog؛ كل ملف يملك busy state خاصًا به.</p></div>
+      <div class="card"><h4>دورة الحياة</h4><p>uploaded، processing، review، confirm، completed؛ وتُخفى سجلات audit الملغاة أو المنتهية أو غير المتاحة.</p></div>
+    </div>
+    <p class="file-path">lib/screens/profile/widgets/profile_cv_section.dart • data/api/cv_api.dart</p>
+    <div class="idea"><strong>أهم فكرة:</strong> التنزيل يتم بطلب مصادق عليه عبر Dio، لا بفتح رابط عام؛ بذلك يبقى ملف CV الخاص محميًا بالتوكن.</div>
+  </section>
+
+  <section class="screen" id="cv-review">
+    <div class="section-head"><div class="number">26</div><div><h2>واجهة مراجعة CV وتعديل البيانات</h2><p>Wizard قبل التأكيد النهائي.</p></div></div>
+    <div class="screen-summary">خمس خطوات: شخصية، خبرة، تعليم، مهارات، مراجعة نهائية. تعرض كل بطاقة القيمة الحالية والقيمة المستخرجة بتنسيق بصري، وتسمح بالإبقاء أو الاستخدام أو التعديل اليدوي.</div>
+    <div class="grid-2">
+      <div class="card"><h4>القرارات الفردية</h4><p>Accept أو Reject لكل suggestion. عند التعديل تُرسل خريطة <code>edited_value</code> المطابقة لنوع الاقتراح.</p></div>
+      <div class="card"><h4>التعديل اليدوي</h4><p>Bottom Sheet ديناميكي: الهاتف/الملخص/الموقع، حقول الخبرة المطلوبة، التعليم، أو اسم المهارة. يتحقق من الحقول الإلزامية قبل الإرسال.</p></div>
+      <div class="card"><h4>Bulk</h4><p>استخدام كل اقتراحات القسم أو إبقاء الحالي دفعة واحدة عبر <code>cv/{id}/suggestions/decisions</code>.</p></div>
+      <div class="card"><h4>التأكيد</h4><p>لا يتفعّل إلا عندما يقول الباك <code>can_confirm</code> ويصبح unresolved = 0، ثم <code>POST cv/{id}/confirm</code>.</p></div>
+    </div>
+    <h3>لماذا لا نعدل draft كاملًا مباشرة؟</h3>
+    <p>عقد الباك الحالي يصرح بـ <code>can_edit_draft: false</code> ويمنع updateReviewDraft، لكنه يتيح <code>can_edit</code> لكل اقتراح وقواعد دقيقة لـ edited_value؛ لذلك استُخدم المسار المدعوم فعليًا.</p>
+    <p class="file-path">lib/screens/profile/cv_review_screen.dart • data/api/cv_api.dart</p>
+    <div class="idea"><strong>أهم فكرة:</strong> لا يُحدّث الملف عند كل اختيار صغير؛ تُحفظ القرارات أولًا ثم يُطبّق كل شيء في Transaction واحدة عند التأكيد النهائي، ما يمنع ملفًا نصف محدّث.</div>
+  </section>
+
+  <section class="screen" id="tests">
+    <div class="section-head"><div class="number">27</div><div><h2>واجهتا الامتحانات والتفاصيل</h2><p>عرض التكليف ثم قرار البدء.</p></div></div>
+    <div class="screen-summary">قائمة الامتحانات المسندة، الحالة والموعد والمحاولات، ثم شاشة تفاصيل توضح التعليمات والمدة وتطلب تأكيدًا قبل بدء الجلسة.</div>
+    <div class="grid-2">
+      <div class="card"><h4>APIs</h4><p><code>GET my/tests</code>، <code>GET tests/{id}</code>، <code>POST tests/{assignmentId}/start</code>.</p></div>
+      <div class="card"><h4>Models</h4><p>TestAssignmentModel يتعامل مع assignment وtest والمحاولة والنتيجة والحالات المحلية.</p></div>
+      <div class="card"><h4>الحالات</h4><p>لا يظهر Retry عند غياب التكليفات؛ يظهر فقط عند فشل الشبكة. تواريخ العرض عبر intl.</p></div>
+      <div class="card"><h4>التنقل</h4><p>لا تُفتح شاشة المحاولة حتى يعيد الباك attempt صالحًا وأسئلة.</p></div>
+    </div>
+    <div class="idea"><strong>أهم فكرة:</strong> فصل «قراءة التعليمات» عن «بدء العداد» يمنع بدء الامتحان عرضيًا.</div>
+  </section>
+
+  <section class="screen" id="test-attempt">
+    <div class="section-head"><div class="number">28</div><div><h2>جلسة الامتحان المحمية</h2><p>إجابات وحماية ضد الخروج واللقطات.</p></div></div>
+    <div class="screen-summary">تعرض الأسئلة والخيارات والنصوص والملفات، تحفظ الإجابات، وتراقب مغادرة التطبيق. الخروج يؤدي إلى forfeit وفق قواعد المنصة.</div>
+    <div class="grid-2">
+      <div class="card"><h4>حفظ الإجابات</h4><p><code>POST test-attempts/{id}/answers/bulk</code>، ورفع الملف بمسار السؤال، ثم submit بتأكيد نهائي.</p></div>
+      <div class="card"><h4>منع اللقطات</h4><p>SecureSessionService يستدعي MethodChannel، وMainActivity يفعّل Android FLAG_SECURE.</p></div>
+      <div class="card"><h4>رصد الخروج</h4><p>WidgetsBindingObserver يراقب inactive/paused/detached ويرسل <code>POST tests/{assignment}/forfeit</code> بسبب app_backgrounded.</p></div>
+      <div class="card"><h4>منع الرجوع</h4><p>PopScope يمنع إغلاق الجلسة بالطريقة العادية دون تطبيق منطق الإنهاء.</p></div>
+    </div>
+    <p class="file-path">lib/screens/tests/test_attempt_screen.dart • services/secure_session_service.dart • MainActivity.kt</p>
+    <div class="idea"><strong>أهم فكرة أمنية:</strong> الحماية ليست واجهة تحذير فقط؛ هناك علم نظام يمنع الالتقاط وحدث lifecycle يُبلغ الباك عند مغادرة الجلسة.</div>
+  </section>
+
+  <section class="screen" id="interviews">
+    <div class="section-head"><div class="number">29</div><div><h2>واجهات المقابلات والتفاصيل</h2><p>الجدولة والتأكيد والدخول.</p></div></div>
+    <div class="screen-summary">قائمة مقابلات المستخدم مع المواعيد والحالات، ثم تفاصيل نوع المقابلة ومدتها وموقعها وحضورها والوظيفة والشركة.</div>
+    <div class="grid-2">
+      <div class="card"><h4>APIs</h4><p><code>GET my/interviews</code>، <code>GET interviews/{id}</code>، <code>POST interviews/{id}/confirm</code>.</p></div>
+      <div class="card"><h4>التوقيت</h4><p>تحويل وقت الباك إلى local time وعرض التاريخ والساعة والمدة.</p></div>
+      <div class="card"><h4>الحضور</h4><p>زر التأكيد يظهر فقط عندما تسمح حالة المقابلة، ويتغير أثناء الطلب.</p></div>
+      <div class="card"><h4>الفيديو</h4><p>للمقابلة الرقمية يُطلب video-session ثم تُفتح واجهة LiveKit داخل التطبيق.</p></div>
+    </div>
+    <div class="idea"><strong>أهم فكرة:</strong> Eligibility الدخول يحدده الباك وفق الحالة والوقت، وليس مجرد وجود زر ثابت في الواجهة.</div>
+  </section>
+
+  <section class="screen" id="video">
+    <div class="section-head"><div class="number">30</div><div><h2>مكالمة الفيديو داخل التطبيق</h2><p>جلسة LiveKit محمية.</p></div></div>
+    <div class="screen-summary">تتصل بالغرفة باستخدام URL وtoken من الباك، تعرض المشاركين المحلي والبعيد، وتوفر الكاميرا والميكروفون وإنهاء المكالمة دون فتح تطبيق خارجي.</div>
+    <div class="grid-2">
+      <div class="card"><h4>إنشاء الجلسة</h4><p><code>POST interviews/{id}/video-session</code> يعيد بيانات الاتصال الآمنة.</p></div>
+      <div class="card"><h4>المكتبة</h4><p>livekit_client لإدارة Room وParticipant وTracks الصوتية والمرئية.</p></div>
+      <div class="card"><h4>الأمان</h4><p>FLAG_SECURE يمنع screenshot/recording على Android أثناء الجلسة.</p></div>
+      <div class="card"><h4>الخروج</h4><p>Lifecycle observer يفصل الغرفة عند مغادرة التطبيق، وPopScope يدير الإنهاء المتعمد.</p></div>
+    </div>
+    <p class="file-path">lib/screens/interviews/interview_video_screen.dart</p>
+    <div class="idea"><strong>أهم فكرة:</strong> استضافة المقابلة داخل التطبيق توحّد تجربة المستخدم وتسمح بتطبيق سياسات الأمان ودورة الحياة التي لا يمكن ضمانها عند فتح رابط خارجي.</div>
+  </section>
+
+  <section class="page" id="api-map">
+    <span class="eyebrow">31 — BACKEND CONTRACT</span>
+    <h2>خريطة أهم مسارات API المستخدمة</h2>
+    <table>
+      <thead><tr><th>المجال</th><th>المسارات الأساسية</th><th>الواجهة المستهلكة</th></tr></thead>
+      <tbody>
+        <tr><td>المصادقة</td><td>auth/login، register/job-seeker، email/resend-otp، email/verify-otp، forgot-password، reset-password</td><td>Login / Register / OTP / Reset</td></tr>
+        <tr><td>الرئيسية</td><td>home</td><td>GuestHome / Home</td></tr>
+        <tr><td>الوظائف</td><td>jobs، jobs/{id}، jobs/recommended، companies/{id}/jobs، reference/job-filters</td><td>Explore / Company / Job Details</td></tr>
+        <tr><td>الطلبات</td><td>jobs/{id}/applications، applications/my، applications/{id}، withdraw</td><td>Apply / Applications / Details</td></tr>
+        <tr><td>معلومات إضافية</td><td>information-requests/{id}، respond</td><td>InformationRequestScreen</td></tr>
+        <tr><td>الملف</td><td>profile، profile/avatar، experiences، education، profile/skills</td><td>Profile / Edit Managers</td></tr>
+        <tr><td>CV</td><td>cv، upload، download، parsed، review، suggestions/decisions، suggestion accept/reject، confirm، cancel</td><td>CV Files / Review Wizard</td></tr>
+        <tr><td>الامتحان</td><td>my/tests، start، questions، answers/bulk، file، submit، forfeit</td><td>Tests / Test Attempt</td></tr>
+        <tr><td>المقابلة</td><td>my/interviews، interviews/{id}، confirm، video-session</td><td>Interviews / Video</td></tr>
+        <tr><td>الإشعارات</td><td>notifications، unread-count، read، read-all، delete، device-tokens</td><td>Header / Notifications / Push service</td></tr>
+        <tr><td>النشاط</td><td>activity</td><td>ActivityScreen</td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><strong>رؤوس الطلبات:</strong> Authorization Bearer token للطلبات الخاصة، Accept application/json، وAccept-Language/Content-Language حسب لغة التطبيق. تُزال Content-Type اليدوية عند FormData كي يولد Dio multipart boundary الصحيح.</div>
+  </section>
+
+  <section class="page" id="quality">
+    <span class="eyebrow">32 — QUALITY & VERIFICATION</span>
+    <h2>الاختبارات والتحقق من النسخة</h2>
+    <div class="grid-2">
+      <div class="card"><h4 class="status-ok">✓ Flutter Analyze</h4><p>لم تظهر أخطاء أو تحذيرات مانعة للبناء. بقيت معلومات lint قديمة مثل print وواجهات deprecated في أجزاء أخرى من المشروع.</p></div>
+      <div class="card"><h4 class="status-ok">✓ Flutter Test</h4><p>نجح 36 اختبارًا تشمل Models، عقود CV، تسلسل المراجعة، الثيم الداكن للمصادقة، الوظائف، المقابلات والرئيسية.</p></div>
+      <div class="card"><h4 class="status-ok">✓ Android Debug Build</h4><p>اكتمل <code>flutter build apk --debug</code> ونتج ملف APK صالح.</p></div>
+      <div class="card"><h4 class="status-ok">✓ Translation JSON</h4><p>تم تحليل ملفي العربية والإنكليزية بنجاح، والتأكد من وجود المفاتيح الثابتة المستخدمة في auth وprofile وnotifications.</p></div>
+    </div>
+    <h3>اختبارات مهمة موجودة</h3>
+    <ul>
+      <li>عدم إرسال edited_value عند اختيار قيمة CV دون تعديل.</li>
+      <li>إرسال edited_value كخريطة حقيقية عند التعديل اليدوي.</li>
+      <li>عدم السماح بالتأكيد النهائي قبل إنهاء كل قرارات CV.</li>
+      <li>قراءة viewer_application وحالة التقديم ونسب التطابق.</li>
+      <li>عرض الشعار والنص والحقول بصورة صحيحة في الوضع الداكن.</li>
+      <li>تحليل جلسة فيديو المقابلة والعقود المتداخلة بأمان.</li>
+    </ul>
+    <div class="callout amber"><strong>ملاحظة مستقبلية:</strong> تحذير Built-in Kotlin يأتي من Flutter الحديث وبعض plugins مثل flutter_webrtc وlivekit_client. البناء الحالي ناجح، لكن يُفضّل متابعة إصدارات المكتبات قبل ترقية Flutter التالية.</div>
+    <div class="idea"><strong>الخلاصة:</strong> أهم ما يميز التطبيق هو ربط رحلة التوظيف كاملة: ملف مهني قابل للبناء من CV ومراجعته يدويًا، وظائف بحالات دقيقة، طلبات قابلة للمتابعة، ثم امتحان ومقابلة داخل بيئة محمية ومترجمة.</div>
+  </section>
+</body>
+</html>

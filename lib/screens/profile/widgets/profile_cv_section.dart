@@ -7,6 +7,7 @@ import '../../../data/models/cv_file_model.dart';
 import '../../../logic/cv_cubit/cv_cubit.dart';
 import '../../../logic/cv_cubit/cv_state.dart';
 import '../../../logic/profile_cubit/profile_cubit.dart';
+import '../../../shared/components/app_snackbar.dart';
 import '../../../shared/components/components.dart';
 import '../../../utils/constants.dart';
 import '../../../localization/app_localizations.dart';
@@ -31,6 +32,34 @@ class ProfileCvSection extends StatelessWidget {
     await context.read<CvCubit>().uploadCv(
       FormData.fromMap({'file': file, 'version_label': selected.name}),
     );
+  }
+
+  Future<void> _download(BuildContext context, CvFileModel file) async {
+    final bytes = await context.read<CvCubit>().downloadCv(file.id);
+    if (bytes == null || !context.mounted) return;
+    try {
+      final savedUri = await FilePicker.saveFile(
+        dialogTitle: context.tr('cv.download_dialog_title'),
+        fileName: file.displayName,
+        bytes: bytes,
+        mimeType: file.mimeType ?? 'application/octet-stream',
+      );
+      if (savedUri != null && context.mounted) {
+        AppSnackBar.success(
+          context,
+          context.tr('cv.download_success'),
+          title: context.tr('cv.download'),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        AppSnackBar.error(
+          context,
+          context.tr('cv.download_error'),
+          title: context.tr('cv.download'),
+        );
+      }
+    }
   }
 
   @override
@@ -68,6 +97,7 @@ class ProfileCvSection extends StatelessWidget {
                   file: file,
                   busy: state.busyFileId == file.id,
                   onUpload: () => _pickAndUpload(context),
+                  onDownload: () => _download(context, file),
                 ),
               ),
             ),
@@ -81,11 +111,13 @@ class _CvTile extends StatelessWidget {
   final CvFileModel file;
   final bool busy;
   final VoidCallback onUpload;
+  final VoidCallback onDownload;
 
   const _CvTile({
     required this.file,
     required this.busy,
     required this.onUpload,
+    required this.onDownload,
   });
 
   @override
@@ -158,22 +190,41 @@ class _CvTile extends StatelessWidget {
               ),
           ],
         ),
-        if (!busy && file.nextAction.key.isNotEmpty) ...[
+        if (!busy &&
+            (file.fileAvailable || file.nextAction.key.isNotEmpty)) ...[
           const SizedBox(height: 11),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () => _performAction(context),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: HomeColors.purple,
-                side: const BorderSide(color: HomeColors.purple),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+          Row(
+            children: [
+              if (file.fileAvailable)
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onDownload,
+                    icon: const Icon(Icons.download_rounded, size: 18),
+                    label: Text(context.tr('cv.download')),
+                  ),
                 ),
-              ),
-              icon: Icon(_actionIcon, size: 18),
-              label: Text(context.tr(_actionLabel)),
-            ),
+              if (file.fileAvailable && file.nextAction.key.isNotEmpty)
+                const SizedBox(width: 8),
+              if (file.nextAction.key.isNotEmpty)
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () => _performAction(context),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: HomeColors.purple,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: Icon(_actionIcon, size: 18),
+                    label: Text(
+                      context.tr(_actionLabel),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ],
       ],

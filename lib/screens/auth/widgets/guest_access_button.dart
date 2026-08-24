@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:work_key/shared/components/components.dart';
+import 'package:work_key/localization/app_localizations.dart';
 
 import '../auth_navigation.dart';
 
@@ -16,7 +17,7 @@ class GuestAccessButton extends StatelessWidget {
         onPressed: () => AuthNavigation.continueAsGuest(context),
         icon: const Icon(Icons.explore_outlined, size: 20),
         label: DefaultText(
-          text: 'Continue as guest',
+          text: context.tr('auth.continue_as_guest'),
           style: TextStyle(
             color: colors.primary,
             fontSize: 14,

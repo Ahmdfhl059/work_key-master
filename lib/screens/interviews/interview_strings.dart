@@ -5,7 +5,8 @@ class InterviewStrings {
   final BuildContext context;
   const InterviewStrings(this.context);
 
-  factory InterviewStrings.of(BuildContext context) => InterviewStrings(context);
+  factory InterviewStrings.of(BuildContext context) =>
+      InterviewStrings(context);
 
   String get title => context.tr('interviews.title');
   String get subtitle => context.tr('interviews.subtitle');

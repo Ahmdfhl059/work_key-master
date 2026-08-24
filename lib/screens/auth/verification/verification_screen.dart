@@ -98,14 +98,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
   }
 
   void _sendAccountCode() {
-    final password = widget.loginPassword;
-    if (password == null || password.isEmpty) {
-      _showMessage(context.tr('verification.sign_in_resend'), error: true);
-      return;
-    }
-    AuthCubit.get(
-      context,
-    ).resendAccountVerification(email: widget.email, password: password);
+    AuthCubit.get(context).resendAccountVerification(email: widget.email);
   }
 
   void _submit() {
@@ -153,7 +146,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
         if (state is ForgotPasswordSuccessState) {
           _showMessage(context.tr('verification.new_code_sent'));
         } else if (state is AccountVerificationCodeSentState) {
-          _showMessage(state.message);
+          _showMessage(context.tr('verification.new_code_sent'));
         } else if (state is AuthSuccessState && !_isReset) {
           if (state.userModel.emailVerified) {
             _showMessage(context.tr('verification.email_verified'));

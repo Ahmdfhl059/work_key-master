@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:work_key/logic/auth_cubit/auth_cubit.dart';
 import 'package:work_key/logic/auth_cubit/auth_state.dart';
+import 'package:work_key/localization/app_localizations.dart';
 import 'package:work_key/shared/components/components.dart';
 import 'package:work_key/shared/components/app_snackbar.dart';
 import '../verification/verification_screen.dart';
@@ -20,7 +21,11 @@ class ForgotPasswordScreen extends StatelessWidget {
           print(
             '--- UI: Forgot Password Success. Code Sent to ${emailController.text} ---',
           );
-          AppSnackBar.success(context, state.message, title: 'Code sent');
+          AppSnackBar.success(
+            context,
+            context.tr('verification.new_code_sent'),
+            title: context.tr('auth.code_sent'),
+          );
           navigateTo(
             context,
             VerificationCodeScreen(email: emailController.text.trim()),
@@ -29,7 +34,11 @@ class ForgotPasswordScreen extends StatelessWidget {
           print(
             '--- UI ERROR: Forgot Password Flow Failed: ${state.error} ---',
           );
-          AppSnackBar.error(context, state.error, title: 'Could not send code');
+          AppSnackBar.error(
+            context,
+            state.error,
+            title: context.tr('auth.code_send_failed'),
+          );
         }
       },
       builder: (context, state) {
@@ -70,7 +79,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                     const SizedBox(height: 40),
                     CustomTextField(
                       controller: emailController,
-                      label: "Email Address",
+                      label: context.tr('auth.email'),
                       hint: "abc@example.com",
                       icon: Icons.alternate_email_rounded,
                     ),
@@ -79,7 +88,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                     state is AuthLoadingState
                         ? const Center(child: CircularProgressIndicator())
                         : CustomButton(
-                            text: "Send Verification Code",
+                            text: context.tr('auth.send_verification_code'),
                             onPressed: () {
                               print('--- UI: Send Code Button Pressed ---');
                               if (emailController.text.trim().isEmpty) {
@@ -88,8 +97,8 @@ class ForgotPasswordScreen extends StatelessWidget {
                                 );
                                 AppSnackBar.warning(
                                   context,
-                                  'Please enter your email address',
-                                  title: 'Email required',
+                                  context.tr('auth.enter_email'),
+                                  title: context.tr('auth.email_required'),
                                 );
                               } else {
                                 print(

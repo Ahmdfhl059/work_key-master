@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 
 import '../api/cv_api.dart';
@@ -43,6 +45,17 @@ class CvRepo {
       throw StateError(_message(root));
     }
     return CvFileModel.fromMap(data);
+  }
+
+  Future<Uint8List> downloadCv(int id) async {
+    final response = await _cvApi.downloadCv(id);
+    final data = response.data;
+    if (data is Uint8List) return data;
+    if (data is List<int>) return Uint8List.fromList(data);
+    if (data is List) {
+      return Uint8List.fromList(data.whereType<int>().toList());
+    }
+    throw const FormatException('CV download response is invalid.');
   }
 
   Future<Map<String, dynamic>> getParsedCv(int id) async {
